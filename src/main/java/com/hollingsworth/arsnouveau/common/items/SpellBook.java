@@ -46,12 +46,18 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.PacketDistributor;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.manager.AnimationData;
+import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplayMana {
+public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplayMana, IAnimatable {
 
     public static final String BOOK_MODE_TAG = "mode";
     public static final String UNLOCKED_SPELLS = "spells";
@@ -280,5 +286,22 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
     public Tier getTier() {
         return this.tier;
     }
+    public AnimationFactory factory = new AnimationFactory(this);
 
+    private <P extends Item & IAnimatable> PlayState predicate(AnimationEvent<P> event)
+    {
+       // event.getController().setAnimation(new AnimationBuilder().addAnimation("wand_gem_spin", true));
+        return PlayState.CONTINUE;
+    }
+
+    @Override
+    public void registerControllers(AnimationData data)
+    {
+        data.addAnimationController(new AnimationController(this, "controller", 20, this::predicate));
+    }
+
+    @Override
+    public AnimationFactory getFactory() {
+        return factory;
+    }
 }

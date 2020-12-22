@@ -53,7 +53,7 @@ public class EnchantingApparatusTile extends AnimatedTile {
                 List<ItemStack> pedestalItems = getPedestalItems();
                 if (recipe != null) {
                     pedestalItems.forEach(i -> i = null);
-                    this.catalystItem = recipe.getResult(pedestalItems, this.catalystItem, this);
+                    this.catalystItem = recipe.getResult(pedestalItems, this.catalystItem, this).copy();
                     clearItems();
                     ParticleUtil.spawnPoof((ServerWorld) world, pos);
                 }
