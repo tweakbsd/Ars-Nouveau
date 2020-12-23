@@ -1,39 +1,96 @@
 {
-    "parent": "builtin/entity",
-	"textures": {
-		"layer0": "ars_nouveau:items/archmage_spell_book"
-	},
-	"gui_light":"front",
-	 "display": {
-        "gui": {
-            "rotation": [ -220, 60, 205 ],
-            "translation": [ 0, -3, 0],
-            "scale":[ 1.80,1.80,1.80 ]
-        },
-        "ground": {
-            "rotation": [ 0, 0, 0 ],
-            "translation": [ 0, 3, 0],
-            "scale":[ 1,1,1 ]
-        },
-        "head": {
-            "rotation": [ 20, 200, 0 ],
-            "translation": [ 0, 0, 0],
-            "scale":[ 1, 1, 1]
-        },
-        "fixed": {
-            "rotation": [ -45, 150, -50 ],
-            "translation": [ 0, -5, -1],
-            "scale":[ 1,1,1 ]
-        },
-        "thirdperson_righthand": {
-            "rotation": [ 75, 315, 0 ],
-            "translation": [ 0, 2.5, 0],
-            "scale": [ 1,1,1 ]
-        },
-        "firstperson_righthand": {
-            "rotation": [ 0, 315, 0 ],
-            "translation": [ 0, 0, 0],
-            "scale": [ 1,1,1]
-        }
+  "credit": "Made with Blockbench",
+  "parent": "builtin/entity",
+  "texture_size": [
+    64,
+    64
+  ],
+  "display": {
+    "thirdperson_righthand": {
+      "translation": [
+        0,
+        -0.5,
+        3
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "thirdperson_lefthand": {
+      "translation": [
+        0,
+        -0.5,
+        3.25
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        -28,
+        -20,
+        -18
+      ],
+      "translation": [
+        2.75,
+        -5.75,
+        -0.5
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        -28,
+        -20,
+        -18
+      ],
+      "translation": [
+        2.75,
+        -5.75,
+        -0.5
+      ]
+    },
+    "ground": {
+      "translation": [
+        0,
+        -2.5,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "translation": [
+        0,
+        -8,
+        0
+      ]
+    },
+    "head": {
+      "translation": [
+        0,
+        6,
+        0
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        -90,
+        0
+      ],
+      "translation": [
+        0,
+        -7.25,
+        -0.25
+      ]
     }
+  }
 }

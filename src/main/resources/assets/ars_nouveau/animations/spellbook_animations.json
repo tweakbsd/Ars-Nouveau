@@ -131,17 +131,30 @@
 		},
 		"open_idle": {
 			"loop": true,
+			"animation_length": 1.04,
 			"bones": {
 				"left_side": {
 					"rotation": {
-						"vector": [0, 67.5, 0],
-						"easing": "easeInSine"
+						"0.0": {
+							"vector": [0, 67.5, 0],
+							"easing": "easeInSine"
+						},
+						"1.04": {
+							"vector": [0, 67.5, 0],
+							"easing": "easeInSine"
+						}
 					}
 				},
 				"right_side": {
 					"rotation": {
-						"vector": [0, -67.5, 0],
-						"easing": "easeInSine"
+						"0.0": {
+							"vector": [0, -67.5, 0],
+							"easing": "easeInSine"
+						},
+						"1.04": {
+							"vector": [0, -67.5, 0],
+							"easing": "easeInSine"
+						}
 					}
 				},
 				"clasp1": {

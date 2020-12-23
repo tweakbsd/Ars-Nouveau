@@ -83,6 +83,12 @@ public class Networking {
                 PacketAnimEntity::encode,
                 PacketAnimEntity::decode,
                 PacketAnimEntity.Handler::handle);
+
+        INSTANCE.registerMessage(nextID(),
+                PacketAnimateBook.class,
+                PacketAnimateBook::encode,
+                PacketAnimateBook::decode,
+                PacketAnimateBook.Handler::handle);
     }
 
     public static void sendToNearby(World world, BlockPos pos, Object toSend){

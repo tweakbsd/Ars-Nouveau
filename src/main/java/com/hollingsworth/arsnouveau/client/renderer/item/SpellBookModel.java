@@ -1,6 +1,7 @@
 package com.hollingsworth.arsnouveau.client.renderer.item;
 
 import com.hollingsworth.arsnouveau.ArsNouveau;
+import com.hollingsworth.arsnouveau.api.spell.ISpellTier;
 import com.hollingsworth.arsnouveau.common.items.SpellBook;
 import net.minecraft.util.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
@@ -13,6 +14,10 @@ public class SpellBookModel extends AnimatedGeoModel<SpellBook> {
 
     @Override
     public ResourceLocation getModelLocation(SpellBook book) {
+        if(book.tier == ISpellTier.Tier.ONE)
+            return T1;
+        if(book.tier == ISpellTier.Tier.TWO)
+            return T2;
         return T3;
     }
 

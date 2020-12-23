@@ -44,11 +44,19 @@ public class PacketUpdateSpellbook{
                 ItemStack stack = StackUtil.getHeldSpellbook(ctx.get().getSender());
                 if(stack != null && stack.getItem() instanceof SpellBook && spellRecipe != null){
                     CompoundNBT tag = stack.hasTag() ? stack.getTag() : new CompoundNBT();
+                    SpellBook item = (SpellBook) stack.getItem();
+                    boolean isNext = SpellBook.getMode(tag) < cast_slot;
+                    if(isNext)
+                        item.playNextPage(stack);
+                    else
+                        item.playBackPage(stack);
                     SpellBook.setRecipe(tag, spellRecipe, cast_slot);
                     SpellBook.setSpellName(tag, spellName, cast_slot);
                     SpellBook.setMode(tag, cast_slot);
                     stack.setTag(tag);
+
                     Networking.INSTANCE.send(PacketDistributor.PLAYER.with(()->ctx.get().getSender()), new PacketUpdateBookGUI(tag));
+
                 }
             }
         });
