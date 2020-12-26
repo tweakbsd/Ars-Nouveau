@@ -79,16 +79,19 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
     public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
         if(!stack.hasTag())
             stack.setTag(new CompoundNBT());
+        if(worldIn.isRemote)
+            return;
 
         if(isSelected){
+            System.out.println("selected");
             if(stack.getTag().getBoolean(OPEN_TAG)){
                 stack.getTag().putInt(OPEN_TICKS, stack.getTag().getInt(OPEN_TICKS) + 1);
+                System.out.println(stack.getTag().getInt(OPEN_TICKS));
             }
-        }
-
-        //if(entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItemOffhand() == stack)
-        if(worldIn.getGameTime() % 5 == 0 && stack.getTag().getBoolean(OPEN_TAG) && (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItemOffhand().getItem() != stack.getItem())){
+        }else if(worldIn.getGameTime() % 5 == 0 && stack.getTag().getBoolean(OPEN_TAG) && (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItemOffhand().getItem() != stack.getItem())){
             stack.getTag().putBoolean(OPEN_TAG, false);
+            stack.getTag().putInt(OPEN_TICKS, 0);
+            System.out.println("closing");
             AnimationController controller = GeckoLibUtil.getControllerForStack(this.factory, stack, "openController");
             // If you don't do this, the popup animation will only play once because the animation will be cached.
             controller.markNeedsReload();
@@ -154,9 +157,9 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
             stack.getTag().putLong(LAST_CAST, worldIn.getGameTime());
             AnimationController controller = GeckoLibUtil.getControllerForStack(this.factory, stack, "openController");
             // If you don't do this, the popup animation will only play once because the animation will be cached.
-            controller.markNeedsReload();
+            //controller.markNeedsReload();
             //Set the animation to open the jackinthebox which will start playing music and eventually do the actual animation. Also sets it to not loop
-            controller.setAnimation(new AnimationBuilder().addAnimation("open", false).addAnimation("open", false));
+            controller.setAnimation(new AnimationBuilder().addAnimation("open", false));
         }
 
 //        CompoundNBT tag = stack.getTag();
