@@ -64,6 +64,7 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
     public static final String BOOK_MODE_TAG = "mode";
     public static final String UNLOCKED_SPELLS = "spells";
     public static final String OPEN_TAG = "open";
+    public static final String OPEN_TICKS = "open_ticks";
     public static final String LAST_CAST = "last_cast";
     public static final int SEGMENTS = 10;
     public Tier tier;
@@ -79,8 +80,12 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
         if(!stack.hasTag())
             stack.setTag(new CompoundNBT());
 
-        if(isSelected)
-            return;
+        if(isSelected){
+            if(stack.getTag().getBoolean(OPEN_TAG)){
+                stack.getTag().putInt(OPEN_TICKS, stack.getTag().getInt(OPEN_TICKS) + 1);
+            }
+        }
+
         //if(entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItemOffhand() == stack)
         if(worldIn.getGameTime() % 5 == 0 && stack.getTag().getBoolean(OPEN_TAG) && (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItemOffhand().getItem() != stack.getItem())){
             stack.getTag().putBoolean(OPEN_TAG, false);
@@ -89,9 +94,9 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
             controller.markNeedsReload();
             //Set the animation to open the jackinthebox which will start playing music and eventually do the actual animation. Also sets it to not loop
             controller.setAnimation(new AnimationBuilder().addAnimation("close", false));
-
-
         }
+
+
 
 
         if(!worldIn.isRemote && worldIn.getGameTime() % 5 == 0 && !stack.hasTag()) {
@@ -151,7 +156,7 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
             // If you don't do this, the popup animation will only play once because the animation will be cached.
             controller.markNeedsReload();
             //Set the animation to open the jackinthebox which will start playing music and eventually do the actual animation. Also sets it to not loop
-            controller.setAnimation(new AnimationBuilder().addAnimation("open", false).addAnimation("open_idle", true));
+            controller.setAnimation(new AnimationBuilder().addAnimation("open", false).addAnimation("open", false));
         }
 
 //        CompoundNBT tag = stack.getTag();
