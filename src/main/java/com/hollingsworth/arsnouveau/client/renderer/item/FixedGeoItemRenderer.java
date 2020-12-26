@@ -32,4 +32,5 @@ public class FixedGeoItemRenderer<T extends Item & IAnimatable> extends GeoItemR
             super.func_239207_a_(itemStack, transformType, stack, bufferIn, combinedLightIn, p_239207_6_);
         }
     }
+
 }

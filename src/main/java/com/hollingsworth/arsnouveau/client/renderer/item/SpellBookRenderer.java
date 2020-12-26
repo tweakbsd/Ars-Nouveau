@@ -5,7 +5,10 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.item.Item;
 import software.bernie.geckolib3.geo.render.built.GeoModel;
+
+import java.util.Objects;
 
 public class SpellBookRenderer extends FixedGeoItemRenderer<SpellBook> {
     public SpellBookRenderer() {
@@ -23,9 +26,8 @@ public class SpellBookRenderer extends FixedGeoItemRenderer<SpellBook> {
 
     }
 
-
-        @Override
-    public Integer getUniqueID(Object animatable) {
-        return currentItemStack.hasTag() && currentItemStack.getTag().getBoolean(SpellBook.OPEN_TAG) ? 1 : 0;
+    @Override
+    public Integer getUniqueID(Item animatable) {
+        return Objects.hash(currentItemStack);
     }
 }

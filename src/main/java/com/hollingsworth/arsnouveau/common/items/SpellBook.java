@@ -12,6 +12,7 @@ import com.hollingsworth.arsnouveau.api.util.MathUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellRecipeUtil;
 import com.hollingsworth.arsnouveau.client.keybindings.ModKeyBindings;
 import com.hollingsworth.arsnouveau.client.particle.ParticleColor;
+import com.hollingsworth.arsnouveau.client.renderer.RenderUtil;
 import com.hollingsworth.arsnouveau.client.renderer.item.SpellBookRenderer;
 import com.hollingsworth.arsnouveau.common.block.tile.IAnimationListener;
 import com.hollingsworth.arsnouveau.common.block.tile.IntangibleAirTile;
@@ -54,7 +55,6 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -83,16 +83,16 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
             return;
 
         if(isSelected){
-            System.out.println("selected");
+
             if(stack.getTag().getBoolean(OPEN_TAG)){
-                stack.getTag().putInt(OPEN_TICKS, stack.getTag().getInt(OPEN_TICKS) + 1);
-                System.out.println(stack.getTag().getInt(OPEN_TICKS));
+               // stack.getTag().putInt(OPEN_TICKS, stack.getTag().getInt(OPEN_TICKS) + 1);
+
             }
         }else if(worldIn.getGameTime() % 5 == 0 && stack.getTag().getBoolean(OPEN_TAG) && (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItemOffhand().getItem() != stack.getItem())){
-            stack.getTag().putBoolean(OPEN_TAG, false);
-            stack.getTag().putInt(OPEN_TICKS, 0);
-            System.out.println("closing");
-            AnimationController controller = GeckoLibUtil.getControllerForStack(this.factory, stack, "openController");
+//            stack.getTag().putBoolean(OPEN_TAG, false);
+//            stack.getTag().putInt(OPEN_TICKS, 0);
+
+            AnimationController controller = RenderUtil.getControllerForStack(this.factory, stack, "openController");
             // If you don't do this, the popup animation will only play once because the animation will be cached.
             controller.markNeedsReload();
             //Set the animation to open the jackinthebox which will start playing music and eventually do the actual animation. Also sets it to not loop
@@ -155,25 +155,13 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
         if(!stack.getTag().getBoolean(OPEN_TAG)){
             stack.getTag().putBoolean(OPEN_TAG, true);
             stack.getTag().putLong(LAST_CAST, worldIn.getGameTime());
-            AnimationController controller = GeckoLibUtil.getControllerForStack(this.factory, stack, "openController");
-            // If you don't do this, the popup animation will only play once because the animation will be cached.
-            //controller.markNeedsReload();
-            //Set the animation to open the jackinthebox which will start playing music and eventually do the actual animation. Also sets it to not loop
+            AnimationController controller = RenderUtil.getControllerForStack(this.factory, stack, "openController");
+            System.out.println("playing anim");
+
+            controller.markNeedsReload();
+
             controller.setAnimation(new AnimationBuilder().addAnimation("open", false));
         }
-
-//        CompoundNBT tag = stack.getTag();
-//        tag.putLong(LAST_CAST, worldIn.getGameTime());
-//        if(!tag.getBoolean(OPEN_TAG)){
-//            for(int i = 0; i < playerIn.inventory.mainInventory.size(); ++i) {
-//                if (!playerIn.inventory.mainInventory.get(i).isEmpty() && stack.getItem() == playerIn.inventory.getStackInSlot(i).getItem() && ItemStack.areItemStackTagsEqual(stack, playerIn.inventory.mainInventory.get(i))) {
-//                    tag.putBoolean(OPEN_TAG, true);
-//                    Networking.sendToNearby(worldIn, playerIn, new PacketAnimateBook(playerIn.getEntityId(), Animations.OPEN.ordinal(), i));
-//
-//                    break;
-//                }
-//            }
-//        }
 
         // Crafting mode
         if(getMode(stack.getTag()) == 0 && playerIn instanceof ServerPlayerEntity) {
@@ -374,7 +362,7 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
     }
 
     public void playBackPage(ItemStack stack){
-        AnimationController controller = GeckoLibUtil.getControllerForStack(this.factory, stack, "pageController");
+        AnimationController controller = RenderUtil.getControllerForStack(this.factory, stack, "pageController");
         // If you don't do this, the popup animation will only play once because the animation will be cached.
         controller.markNeedsReload();
         //Set the animation to open the jackinthebox which will start playing music and eventually do the actual animation. Also sets it to not loop
