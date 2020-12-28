@@ -17,7 +17,7 @@ apply plugin: 'maven-publish'
 
 version = '1.9.4'
 group = 'com.hollingsworth.ars_nouveau' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'ars_nouveau-1.16.4'
+archivesBaseName = 'ars_nouveau-1.16.3'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
@@ -113,7 +113,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.4-35.1.0'
+    minecraft 'net.minecraftforge:forge:1.16.3-34.1.41'
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.2-45:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.2-45")
 

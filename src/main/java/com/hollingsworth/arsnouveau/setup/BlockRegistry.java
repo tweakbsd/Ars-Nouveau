@@ -20,12 +20,19 @@ import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.gen.blockstateprovider.BlockStateProvider;
 import net.minecraft.world.gen.blockstateprovider.BlockStateProviderType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
+
+import com.mojang.serialization.Codec;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static net.minecraft.world.biome.Biome.LOGGER;
 @ObjectHolder(ArsNouveau.MODID)
@@ -332,8 +339,48 @@ public class BlockRegistry {
         }
 
         @SubscribeEvent
-        public static void registerBlockProvider(final RegistryEvent.Register<BlockStateProviderType<?>> e) {
-            e.getRegistry().register(new BlockStateProviderType<>(SupplierBlockStateProvider.CODEC).setRegistryName(ArsNouveau.MODID, "an_stateprovider"));
+        public static void registerBlockProvider(final RegistryEvent.Register<BlockStateProviderType<?>> e)  {
+
+            System.out.println("--------------------- ARS NOUVEAU registerBlockProvider()");
+
+            try {
+
+
+
+                Constructor< BlockStateProviderType > ctor =
+                        ObfuscationReflectionHelper.findConstructor(BlockStateProviderType.class, Codec.class);
+
+
+                System.out.println("--------------------- ARS NOUVEAU ----------- Construtor: " + ctor.toString());
+
+
+                if(ctor != null) {
+
+                    ctor.setAccessible(true);
+                    BlockStateProviderType<?> blockStateProviderType = ctor.newInstance(SupplierBlockStateProvider.CODEC);
+
+                    System.out.println("--------------------- ARS NOUVEAU ----------- new Instance : " + blockStateProviderType.toString());
+
+                    e.getRegistry().register(blockStateProviderType.setRegistryName(ArsNouveau.MODID, "an_stateprovider"));
+
+                }
+
+            } catch (IllegalAccessException e1) {
+
+                System.out.println("--------------------- ARS NOUVEAU : IllegalAccessException " + e1.toString());
+
+            } catch (InvocationTargetException e2) {
+
+                System.out.println("--------------------- ARS NOUVEAU : InvocationTargetException " + e2.toString());
+
+            } catch (InstantiationException e3) {
+
+                System.out.println("--------------------- ARS NOUVEAU : InstantiationException " + e3.toString());
+            }
+
+            //e.getRegistry().register(new BlockStateProviderType<>(SupplierBlockStateProvider.CODEC).setRegistryName(ArsNouveau.MODID, "an_stateprovider"));
+
+            System.out.println("--------------------- ARS NOUVEAU registerBlockProvider  - DONE");
         }
 
 
