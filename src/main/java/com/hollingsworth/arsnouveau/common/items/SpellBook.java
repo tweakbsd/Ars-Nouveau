@@ -85,12 +85,12 @@ public class SpellBook extends Item implements ISpellTier, IScribeable, IDisplay
         if(isSelected){
 
             if(stack.getTag().getBoolean(OPEN_TAG)){
-               // stack.getTag().putInt(OPEN_TICKS, stack.getTag().getInt(OPEN_TICKS) + 1);
+                stack.getTag().putInt(OPEN_TICKS, stack.getTag().getInt(OPEN_TICKS) + 1);
 
             }
         }else if(worldIn.getGameTime() % 5 == 0 && stack.getTag().getBoolean(OPEN_TAG) && (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItemOffhand().getItem() != stack.getItem())){
-//            stack.getTag().putBoolean(OPEN_TAG, false);
-//            stack.getTag().putInt(OPEN_TICKS, 0);
+            stack.getTag().putBoolean(OPEN_TAG, false);
+            stack.getTag().putInt(OPEN_TICKS, 0);
 
             AnimationController controller = RenderUtil.getControllerForStack(this.factory, stack, "openController");
             // If you don't do this, the popup animation will only play once because the animation will be cached.
