@@ -32,7 +32,7 @@ public class ReactiveEnchantmentRecipe implements IEnchantingRecipe{
             return false;
 
         for(ItemStack stack : pedestalItems){
-            if(stack.getItem() instanceof SpellParchment && SpellParchment.getSpellRecipe(stack) == null){
+            if(stack.getItem() instanceof SpellParchment && !SpellParchment.getSpellRecipe(stack).isValid()){
                 return false;
             }
         }
@@ -51,7 +51,7 @@ public class ReactiveEnchantmentRecipe implements IEnchantingRecipe{
         if(!EnchantingApparatusRecipe.doItemsMatch(pedestalItems, toIngredients(items)))
             return false;
         for(ItemStack stack : pedestalItems){
-            if(stack.getItem() instanceof SpellParchment && SpellParchment.getSpellRecipe(stack) == null){
+            if(stack.getItem() instanceof SpellParchment && !SpellParchment.getSpellRecipe(stack).isValid()){
                 return false;
             }
         }

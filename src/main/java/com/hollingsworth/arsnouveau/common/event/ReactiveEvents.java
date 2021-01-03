@@ -1,7 +1,7 @@
 package com.hollingsworth.arsnouveau.common.event;
 
 import com.hollingsworth.arsnouveau.ArsNouveau;
-import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
+import com.hollingsworth.arsnouveau.api.spell.Spell;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.spell.SpellResolver;
 import com.hollingsworth.arsnouveau.api.util.MathUtil;
@@ -24,8 +24,6 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.List;
-
 @Mod.EventBusSubscriber(modid = ArsNouveau.MODID)
 public class ReactiveEvents {
 
@@ -42,8 +40,8 @@ public class ReactiveEvents {
 
     public static void castSpell(PlayerEntity playerIn, ItemStack s){
         if(EnchantmentHelper.getEnchantmentLevel(EnchantmentRegistry.REACTIVE_ENCHANTMENT, s) * .25 >= Math.random() && s.hasTag() && s.getTag().contains("spell")){
-            List<AbstractSpellPart> list = SpellParchment.getSpellRecipe(s);
-            SpellResolver resolver = new SpellResolver(list, true, new SpellContext(list, playerIn));
+            Spell list = SpellParchment.getSpellRecipe(s);
+            SpellResolver resolver = new SpellResolver(list.getRecipe(), true, new SpellContext(list, playerIn));
             RayTraceResult result = playerIn.pick(5, 0, false);
 
             EntityRayTraceResult entityRes = MathUtil.getLookedAtEntity(playerIn, 25);

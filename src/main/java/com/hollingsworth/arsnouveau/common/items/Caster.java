@@ -61,7 +61,7 @@ public abstract class Caster extends ModItem implements IScribeable, IDisplayMan
         if(heldStack.getItem() instanceof SpellBook) {
             spell = new Spell(SpellBook.getRecipeFromTag(heldStack.getTag(), SpellBook.getMode(heldStack.getTag())));
         }else if(heldStack.getItem() instanceof SpellParchment){
-            spell = new Spell(SpellParchment.getSpellRecipe(heldStack));
+            spell = SpellParchment.getSpellRecipe(heldStack);
         }
         if(isScribedSpellValid(caster, player, handIn, stack, spell)){
             success = setSpell(caster, player, handIn, stack, spell);
@@ -119,7 +119,7 @@ public abstract class Caster extends ModItem implements IScribeable, IDisplayMan
             playerIn.sendMessage(new StringTextComponent("Invalid Spell."), Util.DUMMY_UUID);
             return new ActionResult<>(ActionResultType.CONSUME, stack);
         }
-        SpellResolver resolver = new SpellResolver(caster.getSpell().recipe, new SpellContext(caster.getSpell(), playerIn));
+        SpellResolver resolver = new SpellResolver(caster.getSpell().getRecipe(), new SpellContext(caster.getSpell(), playerIn));
         EntityRayTraceResult entityRes = MathUtil.getLookedAtEntity(playerIn, 25);
 
         if(entityRes != null && entityRes.getEntity() instanceof LivingEntity){

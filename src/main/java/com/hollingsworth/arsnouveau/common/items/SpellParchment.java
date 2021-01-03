@@ -1,8 +1,7 @@
 package com.hollingsworth.arsnouveau.common.items;
 
 import com.hollingsworth.arsnouveau.api.item.IScribeable;
-import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
-import com.hollingsworth.arsnouveau.api.util.SpellRecipeUtil;
+import com.hollingsworth.arsnouveau.api.spell.Spell;
 import com.hollingsworth.arsnouveau.common.lib.LibItemNames;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import net.minecraft.client.util.ITooltipFlag;
@@ -34,10 +33,10 @@ public class SpellParchment extends ModItem implements IScribeable {
         stack.getTag().putString("spell", spellRecipe);
     }
 
-    public static List<AbstractSpellPart> getSpellRecipe(ItemStack stack){
+    public static Spell getSpellRecipe(ItemStack stack){
         if(!stack.hasTag())
-            return null;
-        return SpellRecipeUtil.getSpellsFromTagString(stack.getTag().getString("spell"));
+            return new Spell();
+        return Spell.deserialize(stack.getTag().getString("spell"));
     }
 
     @Override
@@ -46,15 +45,8 @@ public class SpellParchment extends ModItem implements IScribeable {
             return;
 
         StringBuilder tip = new StringBuilder();
-        List<AbstractSpellPart> spellsFromTagString = SpellRecipeUtil.getSpellsFromTagString(stack.getTag().getString("spell"));
-        for (int i = 0; i < spellsFromTagString.size(); i++) {
-            AbstractSpellPart spellPart = spellsFromTagString.get(i);
-            tip.append(spellPart.name);
-            if(i < spellsFromTagString.size() - 1){
-                tip.append(" -> ");
-            }
-        }
-        tooltip.add(new StringTextComponent(tip.toString()));
+        Spell spellsFromTagString = Spell.deserialize(stack.getTag().getString("spell"));
+        tooltip.add(new StringTextComponent(spellsFromTagString.getDisplayString()));
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.ArsNouveau;
 import com.hollingsworth.arsnouveau.api.spell.AbstractCastMethod;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
+import com.hollingsworth.arsnouveau.client.ClientInfo;
 import com.hollingsworth.arsnouveau.client.gui.book.GuiSpellBook;
 import com.hollingsworth.arsnouveau.common.items.SpellBook;
 import com.hollingsworth.arsnouveau.common.network.Networking;
@@ -52,7 +53,7 @@ public class GuiRadialMenu extends Screen {
         this.doneClosing = false;
 
         Minecraft mc = Minecraft.getInstance();
-        this.startAnimation = mc.world.getGameTime() + (double) mc.getRenderPartialTicks();
+        this.startAnimation = ClientInfo.ticksInGame + (double) mc.getRenderPartialTicks();
 
         this.selectedItem = -1;
     }
@@ -78,7 +79,7 @@ public class GuiRadialMenu extends Screen {
 
         if (true) {
             final float OPEN_ANIMATION_LENGTH = 2.5f;
-            long worldTime = Minecraft.getInstance().world.getGameTime();
+            long worldTime = ClientInfo.ticksInGame;
             float animationTime = (float) (worldTime + partialTicks - startAnimation);
             float openAnimation = closing ? 1.0f - animationTime / OPEN_ANIMATION_LENGTH : animationTime / OPEN_ANIMATION_LENGTH;
             if (closing && openAnimation <= 0.0f) {

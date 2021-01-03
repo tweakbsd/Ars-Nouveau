@@ -1,7 +1,7 @@
 package com.hollingsworth.arsnouveau.common.block.tile;
 
 import com.hollingsworth.arsnouveau.api.mana.AbstractManaTile;
-import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
+import com.hollingsworth.arsnouveau.api.spell.Spell;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.spell.SpellResolver;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
@@ -110,7 +110,7 @@ public class SummoningCrystalTile extends AbstractManaTile implements IAnimatabl
     }
 
 
-    public @Nullable BlockPos getNextTaskLoc(@Nullable List<AbstractSpellPart> recipe, EntityWhelp caster){
+    public @Nullable BlockPos getNextTaskLoc(Spell spell, EntityWhelp caster){
 
         if(isOff)
             return null;
@@ -141,8 +141,8 @@ public class SummoningCrystalTile extends AbstractManaTile implements IAnimatabl
             return null;
 
 
-        if(recipe != null && caster.getDataManager().get(EntityWhelp.STRICT_MODE)){
-            SpellResolver resolver = new SpellResolver(recipe, new SpellContext(recipe, caster));
+        if(spell != null && caster.getDataManager().get(EntityWhelp.STRICT_MODE)){
+            SpellResolver resolver = new SpellResolver(new SpellContext(spell, caster));
             if(!resolver.wouldCastOnBlockSuccessfully(new BlockRayTraceResult(new Vector3d(taskPos.getX(), taskPos.getY(), taskPos.getZ()), Direction.UP,taskPos, false ), caster))
                 return null;
         }
@@ -151,8 +151,8 @@ public class SummoningCrystalTile extends AbstractManaTile implements IAnimatabl
 
 
 
-    public boolean enoughMana(List<AbstractSpellPart> spellParts){
-        return enoughMana(ManaUtil.getRecipeCost(spellParts) / 4);
+    public boolean enoughMana(Spell spell){
+        return enoughMana(spell.getCost() / 4);
     }
 
     public boolean enoughMana(int manaCost){
@@ -163,8 +163,8 @@ public class SummoningCrystalTile extends AbstractManaTile implements IAnimatabl
         return ManaUtil.takeManaNearbyWithParticles(pos, world, 7, manaCost) != null;
     }
 
-    public boolean removeManaAround(List<AbstractSpellPart> spellParts){
-        return removeManaAround(ManaUtil.getRecipeCost(spellParts) / 4);
+    public boolean removeManaAround(Spell spell){
+        return removeManaAround(spell.getCost() / 4);
     }
 
     public List<BlockPos> getTargets(){

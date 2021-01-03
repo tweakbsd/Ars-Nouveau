@@ -8,30 +8,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public class SpellRecipeUtil {
-
-    public static ArrayList<AbstractAugment> getAugments(List<AbstractSpellPart> spell_recipe, int startPosition, @Nullable LivingEntity caster){
-        ArrayList<AbstractAugment> augments = new ArrayList<>();
-        for(int j = startPosition + 1; j < spell_recipe.size(); j++){
-            AbstractSpellPart next_spell = spell_recipe.get(j);
-            if(next_spell instanceof AbstractAugment){
-                augments.add((AbstractAugment) next_spell);
-            }else{
-                break;
-            }
-        }
-        // Add augment bonuses from equipment
-        if(caster != null)
-            augments.addAll(getEquippedAugments(caster));
-        return augments;
-    }
-
     /**
      * Returns the list of augments that come from equipment
      */
@@ -52,7 +34,7 @@ public class SpellRecipeUtil {
         return augments;
     }
 
-    public static ArrayList<AbstractSpellPart> getSpellsFromString(String spellString){
+    public static List<AbstractSpellPart> getSpellsFromString(String spellString){
         List<String> spellStrings = Arrays.asList(spellString.split(","));
         ArrayList<AbstractSpellPart> spells = new ArrayList<>();
 
@@ -65,7 +47,9 @@ public class SpellRecipeUtil {
 
     /**
      * Parses the NBT stored string, which is stored as an array of spell IDs. ex: [touch, harm, , , ,]
+     * Deprecated - Use Spell#Deserialize
      */
+    @Deprecated
     public static List<AbstractSpellPart> getSpellsFromTagString(String recipeStr){
         ArrayList<AbstractSpellPart> recipe = new ArrayList<>();
         if (recipeStr.length() <= 3) // Account for empty strings and '[,]'
@@ -78,23 +62,4 @@ public class SpellRecipeUtil {
         return recipe;
     }
 
-    public static String serializeForNBT(List<AbstractSpellPart> abstractSpellPart){
-        List<String> tags = new ArrayList<>();
-        for(AbstractSpellPart slot : abstractSpellPart){
-            tags.add(slot.tag);
-        }
-        return tags.toString();
-    }
-
-    public static String getDisplayString(List<AbstractSpellPart> abstractSpellPart){
-        StringBuilder str = new StringBuilder();
-        for (int i = 0; i < abstractSpellPart.size(); i++) {
-            AbstractSpellPart spellPart = abstractSpellPart.get(i);
-            str.append(spellPart.name);
-            if(i < abstractSpellPart.size() - 1){
-                str.append(" -> ");
-            }
-        }
-        return str.toString();
-    }
 }

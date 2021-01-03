@@ -52,7 +52,7 @@ public class Wand extends Caster  implements IAnimatable {
 
     @Override
     public boolean isScribedSpellValid(ISpellCaster caster, PlayerEntity player, Hand hand, ItemStack stack, Spell spell) {
-        return spell.recipe.stream().noneMatch(s -> s instanceof AbstractCastMethod);
+        return spell.getRecipe().stream().noneMatch(s -> s instanceof AbstractCastMethod);
     }
 
     @Override
@@ -65,8 +65,8 @@ public class Wand extends Caster  implements IAnimatable {
         ArrayList<AbstractSpellPart> recipe = new ArrayList<>();
         recipe.add(new MethodProjectile());
         recipe.add(new AugmentAccelerate());
-        recipe.addAll(spell.recipe);
-        spell.recipe = recipe;
+        recipe.addAll(spell.getRecipe());
+        spell.setRecipe(recipe);
         return super.setSpell(caster, player, hand, stack, spell);
     }
 }

@@ -9,7 +9,9 @@ import java.util.List;
  */
 public class EntitySpellResolver extends SpellResolver {
 
-
+    public EntitySpellResolver(Spell spell, SpellContext context){
+        this(spell == null ? new Spell().getRecipe() : spell.getRecipe(), context);
+    }
     public EntitySpellResolver(AbstractCastMethod cast, List<AbstractSpellPart> spell_recipe, SpellContext context) {
         super(cast, spell_recipe, context);
     }

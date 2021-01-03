@@ -5,6 +5,7 @@ import com.hollingsworth.arsnouveau.api.event.DelayedSpellEvent;
 import com.hollingsworth.arsnouveau.api.event.EventQueue;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
+import com.hollingsworth.arsnouveau.api.spell.Spell;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import net.minecraft.entity.LivingEntity;
@@ -25,12 +26,12 @@ public class EffectDelay extends AbstractEffect {
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         spellContext.setCanceled(true);
 
-        if(spellContext.getCurrentIndex() >= spellContext.spell.recipe.size())
+        if(spellContext.getCurrentIndex() >= spellContext.spell.getRecipe().size())
             return;
 
         EventQueue.getInstance().addEvent(
                 new DelayedSpellEvent(30 + getBuffCount(augments, AugmentExtendTime.class) * 20,
-                        spellContext.spell.recipe.subList(spellContext.getCurrentIndex(), spellContext.spell.recipe.size()),
+                        new Spell(spellContext.spell.getRecipe().subList(spellContext.getCurrentIndex(), spellContext.spell.getRecipe().size())),
                         rayTraceResult, world, shooter));
 
     }

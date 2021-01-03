@@ -1,9 +1,6 @@
 package com.hollingsworth.arsnouveau.common.block;
 
-import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
-import com.hollingsworth.arsnouveau.api.spell.EntitySpellResolver;
-import com.hollingsworth.arsnouveau.api.spell.SpellContext;
-import com.hollingsworth.arsnouveau.api.spell.SpellResolver;
+import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.api.util.ManaUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellRecipeUtil;
 import com.hollingsworth.arsnouveau.common.block.tile.SpellTurretTile;
@@ -40,7 +37,6 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Random;
 
 public class SpellTurret extends ModBlock {
@@ -61,16 +57,16 @@ public class SpellTurret extends ModBlock {
 
     public void shootSpell(ServerWorld world, BlockPos pos ) {
         SpellTurretTile tile = (SpellTurretTile) world.getTileEntity(pos);
-        if(tile == null || tile.recipe == null || tile.recipe.isEmpty())
+        if(tile == null || tile.spell == null || !tile.spell.isValid())
             return;
-        int manaCost = ManaUtil.getRecipeCost(tile.recipe)/2;
+        int manaCost = tile.spell.getCost()/2;
         if(ManaUtil.takeManaNearbyWithParticles(pos, world, 10, manaCost) == null)
             return;
         IPosition iposition = getDispensePosition(new ProxyBlockSource(world, pos));
         Direction direction = world.getBlockState(pos).get(FACING);
         FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(world);
         fakePlayer.setPosition(pos.getX(), pos.getY(), pos.getZ());
-        EntitySpellResolver resolver = new EntitySpellResolver(tile.recipe,new SpellContext(tile.recipe, fakePlayer).withCastingTile(world.getTileEntity(pos)));
+        EntitySpellResolver resolver = new EntitySpellResolver(tile.spell,new SpellContext(tile.spell, fakePlayer).withCastingTile(world.getTileEntity(pos)));
         if(resolver.castType instanceof MethodProjectile){
             shootProjectile(world,pos,tile, resolver);
             return;
@@ -92,7 +88,7 @@ public class SpellTurret extends ModBlock {
         FakePlayer fakePlayer = FakePlayerFactory.getMinecraft(world);
         fakePlayer.setPosition(pos.getX(), pos.getY(), pos.getZ());
         EntityProjectileSpell spell = new EntityProjectileSpell(world, fakePlayer,resolver,
-                AbstractSpellPart.getBuffCount(SpellRecipeUtil.getAugments(tile.recipe,  0, null), AugmentPierce.class));
+                AbstractSpellPart.getBuffCount(SpellRecipeUtil.getAugments(tile.spell,  0, null), AugmentPierce.class));
         spell.setShooter(fakePlayer);
         spell.setPosition(iposition.getX(), iposition.getY(), iposition.getZ());
         spell.shoot(direction.getXOffset(), ((float)direction.getYOffset()), direction.getZOffset(), 0.5f, 0);
@@ -153,15 +149,15 @@ public class SpellTurret extends ModBlock {
             ItemStack stack = player.getHeldItem(handIn);
             if(!(stack.getItem() instanceof SpellParchment) || worldIn.isRemote)
                 return ActionResultType.SUCCESS;
-            List<AbstractSpellPart> recipe = SpellParchment.getSpellRecipe(stack);
-            if(recipe == null || recipe.isEmpty())
+            Spell spell = SpellParchment.getSpellRecipe(stack);
+            if(!spell.isValid())
                 return ActionResultType.SUCCESS;
-            if(!(recipe.get(0) instanceof MethodTouch || recipe.get(0) instanceof MethodProjectile)){
+            if(!(spell.getRecipe().get(0) instanceof MethodTouch || spell.getRecipe().get(0) instanceof MethodProjectile)){
                 PortUtil.sendMessage(player, new TranslationTextComponent("ars_nouveau.alert.turret_type"));
                 return ActionResultType.SUCCESS;
             }
 
-            ((SpellTurretTile)worldIn.getTileEntity(pos)).recipe = recipe;
+            ((SpellTurretTile)worldIn.getTileEntity(pos)).spell = spell;
             PortUtil.sendMessage(player, new TranslationTextComponent("ars_nouveau.alert.spell_set"));
             worldIn.notifyBlockUpdate(pos, state, state, 2);
         }

@@ -44,7 +44,7 @@ public class SpellContext {
 
     public AbstractSpellPart nextSpell(){
         this.currentIndex++;
-        return spell.recipe.get(currentIndex - 1);
+        return spell.getRecipe().get(currentIndex - 1);
     }
 
     public void resetSpells(){

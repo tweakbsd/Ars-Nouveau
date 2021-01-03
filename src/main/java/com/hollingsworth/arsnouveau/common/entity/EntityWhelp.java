@@ -5,7 +5,6 @@ import com.hollingsworth.arsnouveau.api.entity.IDispellable;
 import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
-import com.hollingsworth.arsnouveau.api.util.SpellRecipeUtil;
 import com.hollingsworth.arsnouveau.client.particle.ParticleUtil;
 import com.hollingsworth.arsnouveau.common.block.tile.SummoningCrystalTile;
 import com.hollingsworth.arsnouveau.common.entity.goal.whelp.PerformTaskGoal;
@@ -58,7 +57,7 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
 
     public BlockPos crystalPos;
     public int ticksSinceLastSpell;
-    public List<AbstractSpellPart> spellRecipe;
+    public Spell spell;
 
     @Override
     public boolean canDespawn(double p_213397_1_) {
@@ -70,8 +69,8 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
         this.moveController =  new FlyingMovementController(this, 10, true);
     }
 
-    public EntityWhelp setRecipe(ArrayList<AbstractSpellPart> recipe){
-        this.spellRecipe = recipe;
+    public EntityWhelp setRecipe(Spell recipe){
+        this.spell = recipe;
         return this;
     }
 
@@ -91,10 +90,10 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
             return ActionResultType.FAIL;
 
         if(stack != ItemStack.EMPTY && stack.getItem() instanceof SpellParchment){
-            List<AbstractSpellPart> spellParts = SpellParchment.getSpellRecipe(stack);
+            Spell spellParts = SpellParchment.getSpellRecipe(stack);
             if(new EntitySpellResolver(spellParts, new SpellContext(spellParts, this)).canCast(this)) {
-                this.spellRecipe = SpellParchment.getSpellRecipe(stack);
-                setRecipeString(SpellRecipeUtil.serializeForNBT(spellRecipe));
+                this.spell = SpellParchment.getSpellRecipe(stack);
+                setRecipeString(spell.serialize());
                 player.sendMessage(new StringTextComponent("Spell set."), Util.DUMMY_UUID);
                 return ActionResultType.SUCCESS;
             } else{
@@ -102,10 +101,10 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
                 return ActionResultType.SUCCESS;
             }
         }else if(stack == ItemStack.EMPTY){
-            if(spellRecipe == null || spellRecipe.size() == 0){
+            if(spell == null || spell.getRecipe().isEmpty()){
                 player.sendMessage(new StringTextComponent("Give this whelp a spell by giving it some inscribed Spell Parchment. "), Util.DUMMY_UUID);
             }else
-                player.sendMessage(new StringTextComponent("This whelp is casting " + SpellRecipeUtil.getDisplayString(spellRecipe)), Util.DUMMY_UUID);
+                player.sendMessage(new StringTextComponent("This whelp is casting " + spell.getDisplayString()), Util.DUMMY_UUID);
             return ActionResultType.SUCCESS;
         }
 
@@ -171,28 +170,28 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
     }
 
     public boolean canPerformAnotherTask(){
-        return ticksSinceLastSpell > 60 && new EntitySpellResolver(spellRecipe, new SpellContext(spellRecipe, this)).canCast(this);
+        return spell != null && ticksSinceLastSpell > 60 && new EntitySpellResolver(spell, new SpellContext(spell, this)).canCast(this);
     }
 
     public @Nullable BlockPos getTaskLoc(){
-        return world.getTileEntity(crystalPos) instanceof SummoningCrystalTile ? ((SummoningCrystalTile) world.getTileEntity(crystalPos)).getNextTaskLoc(spellRecipe, this) : null;
+        return world.getTileEntity(crystalPos) instanceof SummoningCrystalTile ? ((SummoningCrystalTile) world.getTileEntity(crystalPos)).getNextTaskLoc(spell, this) : null;
     }
 
     public void castSpell(BlockPos target){
         if(world.isRemote || !(world.getTileEntity(crystalPos) instanceof SummoningCrystalTile))
             return;
 
-        if(((SummoningCrystalTile) world.getTileEntity(crystalPos)).removeManaAround(spellRecipe)){
-            EntitySpellResolver resolver = new EntitySpellResolver(this.spellRecipe, new SpellContext(spellRecipe, this));
+        if(((SummoningCrystalTile) world.getTileEntity(crystalPos)).removeManaAround(spell)){
+            EntitySpellResolver resolver = new EntitySpellResolver(this.spell, new SpellContext(spell, this));
             resolver.onCastOnBlock(new BlockRayTraceResult(new Vector3d(target.getX(), target.getY(), target.getZ()), Direction.UP,target, false ), this);
         }
         this.ticksSinceLastSpell = 0;
     }
 
     public boolean enoughManaForTask(){
-        if(!(world.getTileEntity(crystalPos) instanceof SummoningCrystalTile || spellRecipe == null || spellRecipe.size() == 0))
+        if(!(world.getTileEntity(crystalPos) instanceof SummoningCrystalTile || spell == null || !spell.isValid()))
             return false;
-        return ((SummoningCrystalTile) world.getTileEntity(crystalPos)).enoughMana(spellRecipe);
+        return ((SummoningCrystalTile) world.getTileEntity(crystalPos)).enoughMana(spell);
     }
 
     protected void updateAITasks() {
@@ -227,8 +226,8 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
     @Override
     public List<String> getTooltip() {
         List<String> list = new ArrayList<>();
-        List<AbstractSpellPart> spellParts = SpellRecipeUtil.getSpellsFromTagString(this.getRecipeString());
-        String spellString = spellParts.size() > 4 ? SpellRecipeUtil.getDisplayString(spellParts.subList(0, 4)) + "..." :SpellRecipeUtil.getDisplayString(spellParts);
+        Spell spellParts = Spell.deserialize(this.getRecipeString());
+        String spellString = spellParts.getDisplayString();
         String itemString = this.getHeldStack() == ItemStack.EMPTY ? "Nothing." : this.getHeldStack().getDisplayName().getString();
         String itemAction = this.getHeldStack().getItem() instanceof BlockItem ? "Placing: " : "Using: ";
         list.add("Casting: " + spellString);
@@ -252,8 +251,8 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
             tag.putInt("summoner_z", crystalPos.getZ());
         }
         tag.putInt("last_spell", ticksSinceLastSpell);
-        if(spellRecipe != null){
-            tag.putString("spell", SpellRecipeUtil.serializeForNBT(spellRecipe));
+        if(spell != null){
+            tag.putString("spell", spell.serialize());
         }
         if(getHeldStack() != null) {
             CompoundNBT itemTag = new CompoundNBT();
@@ -300,11 +299,11 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
         super.readAdditional(tag);
         if(tag.contains("summoner_x"))
             crystalPos = new BlockPos(tag.getInt("summoner_x"), tag.getInt("summoner_y"), tag.getInt("summoner_z"));
-        spellRecipe = SpellRecipeUtil.getSpellsFromTagString(tag.getString("spell"));
+        spell = Spell.deserialize(tag.getString("spell"));
         ticksSinceLastSpell = tag.getInt("last_spell");
         if(tag.contains("held"))
             setHeldStack(ItemStack.read((CompoundNBT)tag.get("held")));
-
+        setRecipeString(spell.serialize());
         this.dataManager.set(STRICT_MODE, tag.getBoolean("strict"));
     }
 

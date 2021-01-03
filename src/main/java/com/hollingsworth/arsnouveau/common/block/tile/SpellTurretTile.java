@@ -1,11 +1,10 @@
 package com.hollingsworth.arsnouveau.common.block.tile;
 
 import com.hollingsworth.arsnouveau.api.client.ITooltipProvider;
-import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
 import com.hollingsworth.arsnouveau.api.spell.IPickupResponder;
 import com.hollingsworth.arsnouveau.api.spell.IPlaceBlockResponder;
+import com.hollingsworth.arsnouveau.api.spell.Spell;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
-import com.hollingsworth.arsnouveau.api.util.SpellRecipeUtil;
 import com.hollingsworth.arsnouveau.setup.BlockRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
@@ -21,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SpellTurretTile extends TileEntity  implements IPickupResponder, IPlaceBlockResponder, ITooltipProvider {
-    public List<AbstractSpellPart> recipe;
+    public Spell spell;
 
     public SpellTurretTile() {
         super(BlockRegistry.SPELL_TURRET_TYPE);
@@ -44,24 +43,24 @@ public class SpellTurretTile extends TileEntity  implements IPickupResponder, IP
 
     @Override
     public CompoundNBT write(CompoundNBT tag) {
-        if(recipe != null)
-            tag.putString("spell", SpellRecipeUtil.serializeForNBT(recipe));
-
+        if(spell != null)
+            tag.putString("spell", spell.serialize());
         return super.write(tag);
     }
 
     @Override
     public void read(BlockState state, CompoundNBT tag) {
-        this.recipe = SpellRecipeUtil.getSpellsFromTagString(tag.getString("spell"));
+        this.spell = Spell.deserialize(tag.getString("spell"));
         super.read(state, tag);
     }
 
     @Override
     public List<String> getTooltip() {
-        if(this.recipe == null || this.recipe.isEmpty())
+        if(this.spell == null || !this.spell.isValid())
             return new ArrayList<>();
         List<String> list = new ArrayList<>();
-        list.add("Casting: " + SpellRecipeUtil.getDisplayString(recipe));
+        list.add("Casting: " + spell.getDisplayString());
+
         return list;
     }
     @Override

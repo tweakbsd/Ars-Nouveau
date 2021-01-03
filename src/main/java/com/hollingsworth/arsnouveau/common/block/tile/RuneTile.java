@@ -1,12 +1,11 @@
 package com.hollingsworth.arsnouveau.common.block.tile;
 
-import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
 import com.hollingsworth.arsnouveau.api.spell.EntitySpellResolver;
 import com.hollingsworth.arsnouveau.api.spell.IPickupResponder;
+import com.hollingsworth.arsnouveau.api.spell.Spell;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.ManaUtil;
-import com.hollingsworth.arsnouveau.api.util.SpellRecipeUtil;
 import com.hollingsworth.arsnouveau.common.block.RuneBlock;
 import com.hollingsworth.arsnouveau.common.spell.method.MethodTouch;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
@@ -23,11 +22,10 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayerFactory;
 
-import java.util.List;
 import java.util.UUID;
 
 public class RuneTile extends AnimatedTile implements IPickupResponder {
-    public List<AbstractSpellPart> recipe;
+    public Spell spell;
     public boolean isTemporary;
     public boolean isCharged;
     public int ticksUntilCharge;
@@ -39,19 +37,19 @@ public class RuneTile extends AnimatedTile implements IPickupResponder {
         ticksUntilCharge = 0;
     }
 
-    public void setRecipe(List<AbstractSpellPart> recipe) {
-        this.recipe = recipe;
+    public void setSpell(Spell spell) {
+        this.spell = spell;
     }
 
     public void castSpell(Entity entity){
 
-        if(!this.isCharged || recipe == null || recipe.isEmpty() || !(entity instanceof LivingEntity) || !(world instanceof ServerWorld) || !(recipe.get(0) instanceof MethodTouch))
+        if(!this.isCharged || spell == null || !spell.isValid() || !(entity instanceof LivingEntity) || !(world instanceof ServerWorld) || !(spell.getRecipe().get(0) instanceof MethodTouch))
             return;
         try {
 
             PlayerEntity playerEntity = uuid != null ? world.getPlayerByUuid(uuid) : FakePlayerFactory.getMinecraft((ServerWorld) world);
             playerEntity = playerEntity == null ?  FakePlayerFactory.getMinecraft((ServerWorld) world) : playerEntity;
-            EntitySpellResolver resolver = new EntitySpellResolver(recipe, new SpellContext(recipe, playerEntity).withCastingTile(this).withType(SpellContext.CasterType.RUNE));
+            EntitySpellResolver resolver = new EntitySpellResolver(spell, new SpellContext(spell, playerEntity).withCastingTile(this).withType(SpellContext.CasterType.RUNE));
             resolver.onCastOnEntity(ItemStack.EMPTY, playerEntity, (LivingEntity) entity, Hand.MAIN_HAND);
             if (this.isTemporary) {
                 world.destroyBlock(pos, false);
@@ -68,19 +66,19 @@ public class RuneTile extends AnimatedTile implements IPickupResponder {
         }
     }
 
-    public void setParsedSpell(List<AbstractSpellPart> spell){
-        if(spell.size() <= 1){
-            this.recipe = null;
+    public void setParsedSpell(Spell spell){
+        if(spell.getRecipe().size() <= 1){
+            this.spell = null;
             return;
         }
-        spell.set(0, new MethodTouch());
-        this.recipe = spell;
+        spell.getRecipe().set(0, new MethodTouch());
+        this.spell = spell;
     }
 
     @Override
     public CompoundNBT write(CompoundNBT tag) {
-        if(recipe != null)
-            tag.putString("spell", SpellRecipeUtil.serializeForNBT(recipe));
+        if(spell != null)
+            tag.putString("spell", spell.serialize());
         tag.putBoolean("charged", isCharged);
         tag.putBoolean("temp", isTemporary);
         tag.putInt("cooldown", ticksUntilCharge);
@@ -91,7 +89,7 @@ public class RuneTile extends AnimatedTile implements IPickupResponder {
 
     @Override
     public void read( BlockState state, CompoundNBT tag) {
-        this.recipe = SpellRecipeUtil.getSpellsFromTagString(tag.getString("spell"));
+        this.spell = Spell.deserialize(tag.getString("spell"));
         this.isCharged = tag.getBoolean("charged");
         this.isTemporary = tag.getBoolean("temp");
         this.ticksUntilCharge = tag.getInt("cooldown");
