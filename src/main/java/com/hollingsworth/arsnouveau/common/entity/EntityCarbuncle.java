@@ -638,6 +638,9 @@ public class EntityCarbuncle extends CreatureEntity implements IAnimatable, IDis
 
 
     public boolean isValidItem(ItemStack stack){
+        if(!isTamed() && stack.getItem() == Items.GOLD_NUGGET)
+            return true;
+
         if(getValidStorePos(stack) == null)
             return false;
 
