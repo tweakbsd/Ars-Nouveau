@@ -136,7 +136,7 @@ public class GuiSpellBook extends BaseBook {
 
         for(Widget w : buttons){
             if(w instanceof GlyphButton ){
-                w.visible = api.getSpell_map().get(((GlyphButton) w).spell_id).name.contains(str);
+                w.visible = api.getSpell_map().get(((GlyphButton) w).spell_id).name.toLowerCase().contains(str.toLowerCase());
             }
         }
     }
@@ -249,7 +249,7 @@ public class GuiSpellBook extends BaseBook {
 
     public void updateCraftingSlots(int bookSlot){
         //Crafting slots
-        List<AbstractSpellPart> spell_recipe = this.spell_book_tag != null ? SpellBook.getRecipeFromTag(spell_book_tag, bookSlot) : null;
+        List<AbstractSpellPart> spell_recipe = this.spell_book_tag != null ? SpellBook.getRecipeFromTag(spell_book_tag, bookSlot).recipe : null;
         for (int i = 0; i < craftingCells.size(); i++) {
             CraftingButton slot = craftingCells.get(i);
             slot.spellTag = "";
