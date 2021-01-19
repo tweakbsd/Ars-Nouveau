@@ -30,6 +30,8 @@ public class Spell {
 
     public List<AbstractAugment> getAugments(int startPosition, @Nullable LivingEntity caster){
         ArrayList<AbstractAugment> augments = new ArrayList<>();
+        if(recipe == null || recipe.isEmpty())
+            return augments;
         for(int j = startPosition + 1; j < recipe.size(); j++){
             AbstractSpellPart next_spell = recipe.get(j);
             if(next_spell instanceof AbstractAugment){
@@ -42,6 +44,10 @@ public class Spell {
         if(caster != null)
             augments.addAll(getEquippedAugments(caster));
         return augments;
+    }
+
+    public int getBuffsAtIndex(int startPosition, @Nullable LivingEntity caster, Class<? extends AbstractAugment> augmentClass){
+        return (int) getAugments(startPosition, caster).stream().filter(a -> a.getClass().equals(augmentClass)).count();
     }
 
     private int getInitialCost(){
