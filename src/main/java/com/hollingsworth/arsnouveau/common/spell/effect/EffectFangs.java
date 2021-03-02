@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -26,7 +26,7 @@ import java.util.List;
 public class EffectFangs extends AbstractEffect {
 
     public EffectFangs() {
-        super(ModConfig.EffectFangsID, "Fangs");
+        super(GlyphLib.EffectFangsID, "Fangs");
     }
 
 
@@ -117,7 +117,7 @@ public class EffectFangs extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Summons Evoker Fangs in the direction where the spell was targeted.";
     }
 }

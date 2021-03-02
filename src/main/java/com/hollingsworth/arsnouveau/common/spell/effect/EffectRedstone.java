@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class EffectRedstone extends AbstractEffect {
     public EffectRedstone() {
-        super(ModConfig.EffectRedstoneID, "Redstone Signal");
+        super(GlyphLib.EffectRedstoneID, "Redstone Signal");
     }
 
     @Override
@@ -59,7 +59,7 @@ public class EffectRedstone extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Creates a brief redstone signal on a block, like a button. The signal starts at strength 10, and may be increased with Amplify, or decreased with Dampen. The duration may be extended with Extend Time.";
     }
 

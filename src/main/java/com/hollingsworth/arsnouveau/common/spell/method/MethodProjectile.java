@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.method;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractCastMethod;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -30,7 +30,7 @@ import java.util.List;
 public class MethodProjectile extends AbstractCastMethod {
 
     public MethodProjectile() {
-        super(ModConfig.MethodProjectileID, "Projectile");
+        super(GlyphLib.MethodProjectileID, "Projectile");
     }
 
     @Override
@@ -144,7 +144,7 @@ public class MethodProjectile extends AbstractCastMethod {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "A spell you start with. Summons a projectile that applies spell effects when this projectile hits a target or block.";
     }
 

@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -20,7 +20,7 @@ import java.util.List;
 public class EffectSnare extends AbstractEffect {
 
     public EffectSnare() {
-        super(ModConfig.EffectSnareID, "Snare");
+        super(GlyphLib.EffectSnareID, "Snare");
     }
 
     @Override
@@ -41,7 +41,7 @@ public class EffectSnare extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Stops entities from moving and jumping. Extend Time will increase the duration of this effect.";
     }
 

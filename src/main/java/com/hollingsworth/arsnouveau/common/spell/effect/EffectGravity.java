@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -23,7 +23,7 @@ import java.util.List;
 public class EffectGravity extends AbstractEffect {
 
     public EffectGravity() {
-        super(ModConfig.EffectGravityID, "Gravity");
+        super(GlyphLib.EffectGravityID, "Gravity");
     }
 
     @Override
@@ -64,7 +64,7 @@ public class EffectGravity extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Causes blocks and entities to fall.";
     }
 }

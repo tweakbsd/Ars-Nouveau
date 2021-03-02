@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -24,7 +24,7 @@ import java.util.List;
 public class EffectLight extends AbstractEffect {
 
     public EffectLight() {
-        super(ModConfig.EffectLightID, "Light");
+        super(GlyphLib.EffectLightID, "Light");
     }
 
     @Override
@@ -38,14 +38,14 @@ public class EffectLight extends AbstractEffect {
 
         if(rayTraceResult instanceof BlockRayTraceResult){
             BlockPos pos = ((BlockRayTraceResult) rayTraceResult).getPos().offset(((BlockRayTraceResult) rayTraceResult).getFace());
-            //placedBlockWouldCollide
             if (world.getBlockState(pos).getMaterial() == Material.AIR && world.placedBlockCollides(BlockRegistry.LIGHT_BLOCK.getDefaultState(), pos, ISelectionContext.dummy())) {
                 world.setBlockState(pos, BlockRegistry.LIGHT_BLOCK.getDefaultState());
                 LightTile tile = ((LightTile)world.getTileEntity(pos));
-                tile.red = spellContext.colors.r;
-                tile.green = spellContext.colors.g;
-                tile.blue = spellContext.colors.b;
-                world.notifyBlockUpdate(pos, world.getBlockState(pos),world.getBlockState(pos), 2);
+                if(tile != null){
+                    tile.red = spellContext.colors.r;
+                    tile.green = spellContext.colors.g;
+                    tile.blue = spellContext.colors.b;
+                }
             }
 
         }
@@ -66,7 +66,7 @@ public class EffectLight extends AbstractEffect {
     public Item getCraftingReagent(){return Items.LANTERN;}
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "If cast on a block, a permanent light source is created. When cast on yourself, you will receive night vision. When cast on other entities, they will receive Night Vision and Glowing.";
     }
 }

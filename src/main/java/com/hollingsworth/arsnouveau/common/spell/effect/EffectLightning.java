@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class EffectLightning extends AbstractEffect {
     public EffectLightning() {
-        super(ModConfig.EffectLightningID, "Lightning");
+        super(GlyphLib.EffectLightningID, "Lightning");
     }
 
 
@@ -49,7 +49,7 @@ public class EffectLightning extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Summons a lightning bolt at the location";
     }
 }

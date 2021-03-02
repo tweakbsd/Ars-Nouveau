@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -10,7 +10,6 @@ import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtract;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
@@ -22,7 +21,7 @@ import java.util.List;
 public class EffectExplosion extends AbstractEffect {
 
     public EffectExplosion() {
-        super(ModConfig.EffectExplosionID, "Explosion");
+        super(GlyphLib.EffectExplosionID, "Explosion");
     }
 
     @Override
@@ -62,7 +61,7 @@ public class EffectExplosion extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Causes an explosion at the location.";
     }
 }

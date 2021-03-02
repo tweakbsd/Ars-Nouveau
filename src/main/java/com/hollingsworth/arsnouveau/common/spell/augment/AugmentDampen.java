@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.augment;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 public class AugmentDampen extends AbstractAugment {
 
     public AugmentDampen() {
-        super(ModConfig.AugmentDampenID, "Dampen");
+        super(GlyphLib.AugmentDampenID, "Dampen");
     }
 
     @Override
@@ -30,7 +30,7 @@ public class AugmentDampen extends AbstractAugment {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Decreases the power of most spells. Decreases the mana cost slighty, but never below 0.";
     }
 }

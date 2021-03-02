@@ -1,6 +1,7 @@
 package com.hollingsworth.arsnouveau.api.spell;
 
 import com.hollingsworth.arsnouveau.api.util.LootUtil;
+import com.hollingsworth.arsnouveau.common.potions.ModPotions;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDurationDown;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtract;
@@ -57,6 +58,13 @@ public abstract class AbstractEffect extends AbstractSpellPart {
         applyPotion(entity, potionEffect, augmentTypes, 30, 8);
     }
 
+    public boolean canSummon(LivingEntity playerEntity){
+        return isRealPlayer(playerEntity) && playerEntity.getActivePotionEffect(ModPotions.SUMMONING_SICKNESS) == null;
+    }
+    public void applySummoningSickness(LivingEntity playerEntity, int time){
+        playerEntity.addPotionEffect(new EffectInstance(ModPotions.SUMMONING_SICKNESS, time));
+    }
+
     public void applyPotionWithCap(LivingEntity entity, Effect potionEffect, List<AbstractAugment> augmentTypes, int baseDuration, int durationBuffBase, int cap){
         if(entity == null)
             return;
@@ -90,12 +98,13 @@ public abstract class AbstractEffect extends AbstractSpellPart {
     }
 
     public void dealDamage(World world, LivingEntity shooter, float damage, List<AbstractAugment> augments, Entity entity, DamageSource source){
-        if(!(entity instanceof LivingEntity))
-            return;
 
-        LivingEntity mob = (LivingEntity) entity;
         shooter = shooter == null ? FakePlayerFactory.getMinecraft((ServerWorld) world) : shooter;
         entity.attackEntityFrom(source, damage);
+        if(!(entity instanceof LivingEntity))
+            return;
+        LivingEntity mob = (LivingEntity) entity;
+
         if(mob.getHealth() <= 0 && !mob.removed && hasBuff(augments, AugmentFortune.class)){
             int looting = getBuffCount(augments, AugmentFortune.class);
             LootContext.Builder lootContext = LootUtil.getLootingContext((ServerWorld)world,shooter, mob, looting, DamageSource.causePlayerDamage((PlayerEntity) shooter));
@@ -112,9 +121,7 @@ public abstract class AbstractEffect extends AbstractSpellPart {
     }
 
     public Vector3d safelyGetHitPos(RayTraceResult result){
-        if(result instanceof EntityRayTraceResult)
-            return ((EntityRayTraceResult) result).getEntity() != null ? ((EntityRayTraceResult) result).getEntity().getPositionVec() : result.getHitVec();
-        return result.getHitVec();
+        return result instanceof EntityRayTraceResult ? ((EntityRayTraceResult) result).getEntity().getPositionVec() : result.getHitVec();
     }
 
     public boolean isRealPlayer(LivingEntity entity){

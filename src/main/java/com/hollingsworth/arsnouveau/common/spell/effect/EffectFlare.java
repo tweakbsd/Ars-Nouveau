@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.ArsNouveauAPI;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class EffectFlare extends AbstractEffect {
     public EffectFlare() {
-        super(ModConfig.EffectFlareID, "Flare");
+        super(GlyphLib.EffectFlareID, "Flare");
     }
 
     @Override
@@ -61,7 +61,7 @@ public class EffectFlare extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "When used on entities that are on fire, Flare causes a burst of damage and will spread fire and deal damage to other nearby entities. Does significantly more damage than Harm. Can be augmented with Extend Time, Amplify, and AOE.";
     }
 

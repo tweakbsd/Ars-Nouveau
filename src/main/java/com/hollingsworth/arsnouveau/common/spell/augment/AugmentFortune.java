@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.augment;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 public class AugmentFortune extends AbstractAugment {
     public AugmentFortune() {
-        super(ModConfig.AugmentFortuneID, "Fortune");
+        super(GlyphLib.AugmentFortuneID, "Fortune");
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AugmentFortune extends AbstractAugment {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Increases the drop chance from mobs killed by Damage and blocks that are destroyed by Break. Cannot be combined with Extract";
     }
 }

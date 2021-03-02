@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.augment;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -9,12 +9,12 @@ import javax.annotation.Nullable;
 
 public class AugmentPierce extends AbstractAugment {
     public AugmentPierce() {
-        super(ModConfig.AugmentPierceID, "Pierce");
+        super(GlyphLib.AugmentPierceID, "Pierce");
     }
 
     @Override
     public int getManaCost() {
-        return 20;
+        return 40;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AugmentPierce extends AbstractAugment {
     }
 
     @Override
-    protected String getBookDescription() {
-        return "When applied to the Projectile spell, projectiles may continue through their path an additional time after hitting a mob or block.";
+    public String getBookDescription() {
+        return "When applied to the Projectile spell, projectiles may continue through their path an additional time after hitting a mob or block. Causes certain effects to also target the block behind them, like Break. Combines with AOE to provide depth.";
     }
 }

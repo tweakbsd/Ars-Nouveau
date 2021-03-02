@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -25,7 +25,7 @@ import java.util.List;
 
 public class EffectIntangible extends AbstractEffect {
     public EffectIntangible() {
-        super(ModConfig.EffectIntangibleID, "Intangible");
+        super(GlyphLib.EffectIntangibleID, "Intangible");
     }
 
     @Override
@@ -67,7 +67,7 @@ public class EffectIntangible extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Causes blocks to temporarily turn into air. Can be modified with Amplify for blocks of higher hardness, AOE, Duration Down, and Extend Time.";
     }
 }

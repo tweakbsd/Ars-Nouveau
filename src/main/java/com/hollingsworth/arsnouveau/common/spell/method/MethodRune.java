@@ -1,7 +1,7 @@
 package com.hollingsworth.arsnouveau.common.spell.method;
 
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractCastMethod;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -24,7 +24,7 @@ import java.util.List;
 
 public class MethodRune extends AbstractCastMethod {
     public MethodRune() {
-        super(ModConfig.MethodRuneID, "Rune");
+        super(GlyphLib.MethodRuneID, "Rune");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class MethodRune extends AbstractCastMethod {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Places a rune on the ground that will cast the spell on targets that touch the rune. Unlike runes placed by Runic Chalk, these runes are temporary " +
                 "and cannot be recharged. When using Item Pickup, items are deposited into adjacent inventories.";
     }

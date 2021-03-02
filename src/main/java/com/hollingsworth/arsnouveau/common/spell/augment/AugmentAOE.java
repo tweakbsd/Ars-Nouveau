@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.augment;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 public class AugmentAOE extends AbstractAugment {
     public AugmentAOE() {
-        super(ModConfig.AugmentAOEID, "AOE");
+        super(GlyphLib.AugmentAOEID, "AOE");
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AugmentAOE extends AbstractAugment {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Spells will affect a larger area around a targeted block.";
     }
 }

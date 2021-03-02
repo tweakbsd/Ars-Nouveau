@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.event.DelayedSpellEvent;
 import com.hollingsworth.arsnouveau.api.event.EventQueue;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class EffectDelay extends AbstractEffect {
     public EffectDelay() {
-        super(ModConfig.EffectDelayID, "Delay");
+        super(GlyphLib.EffectDelayID, "Delay");
     }
 
     @Override
@@ -40,7 +40,7 @@ public class EffectDelay extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Delays the resolution of effects placed to the right of this spell for a few moments. The delay may be increased with the Extend Time augment.";
     }
 

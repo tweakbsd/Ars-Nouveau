@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -8,6 +8,7 @@ import com.hollingsworth.arsnouveau.api.util.LootUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentFortune;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentPierce;
 import com.hollingsworth.arsnouveau.setup.BlockRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -30,7 +31,7 @@ import java.util.List;
 public class EffectHarvest extends AbstractEffect {
 
     public EffectHarvest() {
-        super(ModConfig.EffectHarvestID, "Harvest");
+        super(GlyphLib.EffectHarvestID, "Harvest");
     }
 
     @Override
@@ -39,7 +40,7 @@ public class EffectHarvest extends AbstractEffect {
             BlockRayTraceResult ray = (BlockRayTraceResult) rayTraceResult;
             if(world.isRemote)
                 return;
-            for(BlockPos blockpos : SpellUtil.calcAOEBlocks(shooter, ray.getPos(), ray, getBuffCount(augments, AugmentAOE.class))){
+            for(BlockPos blockpos : SpellUtil.calcAOEBlocks(shooter, ray.getPos(), ray, getBuffCount(augments, AugmentAOE.class), getBuffCount(augments, AugmentPierce.class))){
                 BlockState state = world.getBlockState(blockpos);
 
                 if(state.getBlock() instanceof FarmlandBlock || world.getBlockState(blockpos.up()).getBlock() instanceof CropsBlock){
@@ -104,7 +105,7 @@ public class EffectHarvest extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "When used on grown crops, this spell will obtain the fully grown product without destroying the plant.";
     }
 }

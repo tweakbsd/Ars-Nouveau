@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class EffectShield extends AbstractEffect {
     public EffectShield() {
-        super(ModConfig.EffectShieldID , "Shield");
+        super(GlyphLib.EffectShieldID , "Shield");
     }
 
     @Override
@@ -49,7 +49,7 @@ public class EffectShield extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Applies the Shield buff. This buff will reduce a flat amount of damage taken from magical and physical sources. Does not reduce damage from environmental sources.";
     }
 }

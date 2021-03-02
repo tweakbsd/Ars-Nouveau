@@ -1,13 +1,12 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
 import com.hollingsworth.arsnouveau.ArsNouveau;
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.LootUtil;
-import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtract;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentFortune;
@@ -32,31 +31,29 @@ public class EffectFell extends AbstractEffect {
     public static ITag.INamedTag<Block> FELLABLE =  BlockTags.createOptional(new ResourceLocation(ArsNouveau.MODID, "harvest/fellable"));
 
     public EffectFell() {
-        super(ModConfig.EffectFellID, "Fell");
+        super(GlyphLib.EffectFellID, "Fell");
     }
 
     @Override
     public void onResolveBlock(BlockRayTraceResult ray, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
-        for(BlockPos blockpos : SpellUtil.calcAOEBlocks(shooter, ray.getPos(), ray, getBuffCount(augments, AugmentAOE.class))) {
-            BlockState state = world.getBlockState(blockpos);
-            if (isTree(state)) {
-                Set<BlockPos> list = getTree(world, ray.getPos(), 50 + 50 * getBuffCount(augments, AugmentAOE.class));
-                list.forEach(listPos -> {
-                    if (!BlockUtil.destroyRespectsClaim(shooter, world, listPos))
-                        return;
-                    if (hasBuff(augments, AugmentExtract.class)) {
-                        world.getBlockState(listPos).getDrops(LootUtil.getSilkContext((ServerWorld) world, listPos, shooter)).forEach(i -> world.addEntity(new ItemEntity(world, listPos.getX(), listPos.getY(), listPos.getZ(), i)));
-                        BlockUtil.destroyBlockSafelyWithoutSound(world, listPos, false);
-                    } else if (hasBuff(augments, AugmentFortune.class)) {
-                        world.getBlockState(listPos).getDrops(LootUtil.getFortuneContext((ServerWorld) world, listPos, shooter, getBuffCount(augments, AugmentFortune.class))).forEach(i -> world.addEntity(new ItemEntity(world, listPos.getX(), listPos.getY(), listPos.getZ(), i)));
-                        BlockUtil.destroyBlockSafelyWithoutSound(world, listPos, false);
-                    } else {
-                        BlockUtil.destroyBlockSafelyWithoutSound(world, listPos, true);
-                    }
-                });
-                world.playEvent(2001, blockpos, Block.getStateId(state));
-                return;
-            }
+        BlockPos blockPos = ray.getPos();
+        BlockState state = world.getBlockState(blockPos);
+        if (isTree(state)) {
+            Set<BlockPos> list = getTree(world, blockPos, 50 + 50 * getBuffCount(augments, AugmentAOE.class));
+            list.forEach(listPos -> {
+                if (!BlockUtil.destroyRespectsClaim(shooter, world, listPos))
+                    return;
+                if (hasBuff(augments, AugmentExtract.class)) {
+                    world.getBlockState(listPos).getDrops(LootUtil.getSilkContext((ServerWorld) world, listPos, shooter)).forEach(i -> world.addEntity(new ItemEntity(world, listPos.getX(), listPos.getY(), listPos.getZ(), i)));
+                    BlockUtil.destroyBlockSafelyWithoutSound(world, listPos, false);
+                } else if (hasBuff(augments, AugmentFortune.class)) {
+                    world.getBlockState(listPos).getDrops(LootUtil.getFortuneContext((ServerWorld) world, listPos, shooter, getBuffCount(augments, AugmentFortune.class))).forEach(i -> world.addEntity(new ItemEntity(world, listPos.getX(), listPos.getY(), listPos.getZ(), i)));
+                    BlockUtil.destroyBlockSafelyWithoutSound(world, listPos, false);
+                } else {
+                    BlockUtil.destroyBlockSafelyWithoutSound(world, listPos, true);
+                }
+            });
+            world.playEvent(2001, blockPos, Block.getStateId(state));
         }
     }
 
@@ -106,7 +103,7 @@ public class EffectFell extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Harvests entire trees, mushrooms, cactus, and other vegetation. Can be amplified with Amplify to break materials of higher hardness. AOE will increase the number of blocks that may be broken at one time.";
     }
 }

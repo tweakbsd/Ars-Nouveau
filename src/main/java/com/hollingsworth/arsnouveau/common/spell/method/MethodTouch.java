@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.method;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractCastMethod;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -23,7 +23,7 @@ import java.util.List;
 public class MethodTouch extends AbstractCastMethod {
 
     public MethodTouch() {
-        super(ModConfig.MethodTouchID, "Touch");
+        super(GlyphLib.MethodTouchID, "Touch");
     }
 
     @Override
@@ -83,7 +83,7 @@ public class MethodTouch extends AbstractCastMethod {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Applies spells at the block or entity that is targeted.";
     }
 

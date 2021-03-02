@@ -1,6 +1,6 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EffectHeal extends AbstractEffect {
     public EffectHeal() {
-        super(ModConfig.EffectHealID, "Heal");
+        super(GlyphLib.EffectHealID, "Heal");
     }
 
     @Override
@@ -62,7 +62,7 @@ public class EffectHeal extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Heals a small amount of health for the target. When used with Extend Time, the Regeneration buff is applied instead, up to level 5.";
     }
 }

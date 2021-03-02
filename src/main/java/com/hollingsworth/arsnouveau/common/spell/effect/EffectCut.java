@@ -1,12 +1,14 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
-import com.hollingsworth.arsnouveau.ModConfig;
+import com.hollingsworth.arsnouveau.GlyphLib;
+import com.hollingsworth.arsnouveau.api.ANFakePlayer;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentFortune;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentPierce;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -22,14 +24,13 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.IForgeShearable;
-import net.minecraftforge.common.util.FakePlayerFactory;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class EffectCut extends AbstractEffect {
     public EffectCut() {
-        super(ModConfig.EffectCutID, "Cut");
+        super(GlyphLib.EffectCutID, "Cut");
     }
 
 
@@ -51,7 +52,7 @@ public class EffectCut extends AbstractEffect {
 
     @Override
     public void onResolveBlock(BlockRayTraceResult rayTraceResult, World world,  LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
-        for(BlockPos p : SpellUtil.calcAOEBlocks(shooter, rayTraceResult.getPos(), rayTraceResult, getBuffCount(augments, AugmentAOE.class))) {
+        for(BlockPos p : SpellUtil.calcAOEBlocks(shooter, rayTraceResult.getPos(), rayTraceResult, getBuffCount(augments, AugmentAOE.class), getBuffCount(augments, AugmentPierce.class))) {
             ItemStack shears = new ItemStack(Items.SHEARS);
             applyEnchantments(augments, shears);
             if (world.getBlockState(p).getBlock() instanceof IForgeShearable) {
@@ -62,7 +63,7 @@ public class EffectCut extends AbstractEffect {
                     items.forEach(i -> world.addEntity(new ItemEntity(world, p.getX(), p.getY(),p.getZ(), i)));
                 }
             }
-            PlayerEntity entity = FakePlayerFactory.getMinecraft((ServerWorld)world);
+            PlayerEntity entity = new ANFakePlayer((ServerWorld) world);
             entity.setHeldItem(Hand.MAIN_HAND, shears);
             entity.setPosition(p.getX(), p.getY(), p.getZ());
             world.getBlockState(p).onBlockActivated(world, entity, Hand.MAIN_HAND, rayTraceResult);
@@ -70,7 +71,7 @@ public class EffectCut extends AbstractEffect {
     }
 
     @Override
-    protected String getBookDescription() {
+    public String getBookDescription() {
         return "Shears entities and blocks, or damages non-shearable entities for a small amount. Costs nothing.";
     }
 
