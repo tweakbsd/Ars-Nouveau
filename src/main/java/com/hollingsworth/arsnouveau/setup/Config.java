@@ -40,6 +40,13 @@ public class Config {
     public static ForgeConfigSpec.IntValue CARBUNCLE_WEIGHT;
     public static ForgeConfigSpec.IntValue SYLPH_WEIGHT;
 
+    public static ForgeConfigSpec.IntValue WGUARDIAN_WEIGHT;
+    public static ForgeConfigSpec.IntValue WSTALKER_WEIGHT;
+    public static ForgeConfigSpec.IntValue WHUNTER_WEIGHT;
+    public static ForgeConfigSpec.BooleanValue HUNTER_ATTACK_ANIMALS;
+    public static ForgeConfigSpec.BooleanValue STALKER_ATTACK_ANIMALS;
+    public static ForgeConfigSpec.BooleanValue GUARDIAN_ATTACK_ANIMALS;
+
     private static Map<String, ForgeConfigSpec.BooleanValue> enabledSpells = new HashMap<>();
     private static Map<String, ForgeConfigSpec.BooleanValue> startingSpells = new HashMap<>();
     private static Map<String, ForgeConfigSpec.IntValue> spellCost = new HashMap<>();
@@ -63,6 +70,13 @@ public class Config {
         SPAWN_BOOK = SERVER_BUILDER.comment("Spawn a book in the players inventory on login").define("spawnBook", true);
         CARBUNCLE_WEIGHT = SERVER_BUILDER.comment("How often Carbuncles spawn").defineInRange("carbuncleWeight",5,0,100);
         SYLPH_WEIGHT = SERVER_BUILDER.comment("How often Sylphs spawn").defineInRange("sylphWeight",5,0,100);
+        WGUARDIAN_WEIGHT = SERVER_BUILDER.comment("How often Wilden Guardians spawn").defineInRange("wguardianWeight",50,0,200);
+        WSTALKER_WEIGHT = SERVER_BUILDER.comment("How often Wilden Stalkers spawn").defineInRange("wstalkerWeight",50,0,200);
+        WHUNTER_WEIGHT = SERVER_BUILDER.comment("How often Wilden Hunter spawn").defineInRange("whunterWeight",50,0,200);
+        HUNTER_ATTACK_ANIMALS = SERVER_BUILDER.comment("Should the Wilden Hunter attack animals?").define("hunterHuntsAnimals", true);
+        STALKER_ATTACK_ANIMALS = SERVER_BUILDER.comment("Should the Wilden Stalker attack animals?").define("stalkerHuntsAnimals", false);
+        GUARDIAN_ATTACK_ANIMALS = SERVER_BUILDER.comment("Should the Wilden Defender attack animals?").define("defenderHuntsAnimals", false);
+
         SERVER_BUILDER.pop();
         SERVER_BUILDER.comment("Mana").push("mana");
         INIT_MANA_REGEN = SERVER_BUILDER.comment("Base mana regen in seconds").defineInRange("baseRegen", 5, 0, Integer.MAX_VALUE);

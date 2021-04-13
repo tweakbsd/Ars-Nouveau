@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.common.block.tile.IAnimationListener;
 import com.hollingsworth.arsnouveau.common.entity.goal.wilden.WildenMeleeAttack;
 import com.hollingsworth.arsnouveau.common.entity.goal.wilden.WildenRamAttack;
 import com.hollingsworth.arsnouveau.common.entity.goal.wilden.WildenSummon;
+import com.hollingsworth.arsnouveau.setup.Config;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -40,10 +41,11 @@ public class  WildenHunter extends CreatureEntity implements IAnimatable, IAnima
         this.goalSelector.addGoal(3, new WildenSummon(this));
         this.goalSelector.addGoal(1, new SwimGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, AnimalEntity.class, true));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
         this.goalSelector.addGoal(8, new LookAtGoal(this, PlayerEntity.class, 8.0F));
         this.goalSelector.addGoal(8, new LookRandomlyGoal(this));
+        if(Config.HUNTER_ATTACK_ANIMALS.get())
+            this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AnimalEntity.class, 10, true, false, (entity) -> !(entity instanceof SummonWolf) || !((SummonWolf) entity).isWildenSummon));
 
     }
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
@@ -82,7 +84,7 @@ public class  WildenHunter extends CreatureEntity implements IAnimatable, IAnima
                 .createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.25D)
                 .createMutableAttribute(Attributes.KNOCKBACK_RESISTANCE, 0.6F)
                 .createMutableAttribute(Attributes.ATTACK_KNOCKBACK, 1.0D)
-                .createMutableAttribute(Attributes.ATTACK_DAMAGE, 3.5D)
+                .createMutableAttribute(Attributes.ATTACK_DAMAGE, 4.5D)
                 .createMutableAttribute(Attributes.ARMOR, 2.0D);
     }
 

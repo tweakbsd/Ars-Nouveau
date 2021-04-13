@@ -5,17 +5,19 @@ import com.hollingsworth.arsnouveau.common.entity.goal.stalker.DiveAttackGoal;
 import com.hollingsworth.arsnouveau.common.entity.goal.stalker.FlyHelper;
 import com.hollingsworth.arsnouveau.common.entity.goal.stalker.LeapGoal;
 import com.hollingsworth.arsnouveau.common.entity.goal.wilden.WildenMeleeAttack;
+import com.hollingsworth.arsnouveau.setup.Config;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MoverType;
+import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -46,12 +48,14 @@ public class WildenStalker extends CreatureEntity implements IAnimatable, IAnima
         this.goalSelector.addGoal(1, new DiveAttackGoal(this));
         this.goalSelector.addGoal(1, new SwimGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, AnimalEntity.class, true));
         this.goalSelector.addGoal(5, new WildenMeleeAttack(this, 1.3D, true, WildenStalker.Animations.ATTACK.ordinal(), () -> !isFlying()));
         this.goalSelector.addGoal(8, new MeleeAttackGoal(this, 1.2f, true));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
         this.goalSelector.addGoal(8, new LookAtGoal(this, PlayerEntity.class, 8.0F));
         this.goalSelector.addGoal(8, new LookRandomlyGoal(this));
+        if(Config.STALKER_ATTACK_ANIMALS.get())
+            this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AnimalEntity.class, 10, true, false, (entity) -> !(entity instanceof SummonWolf) || !((SummonWolf) entity).isWildenSummon));
+
     }
 
     @Override
@@ -69,6 +73,13 @@ public class WildenStalker extends CreatureEntity implements IAnimatable, IAnima
             }else
                 timeFlying = 0;
         }
+    }
+
+    @Override
+    public boolean attackEntityAsMob(Entity entityIn) {
+        if(!world.isRemote && entityIn instanceof LivingEntity)
+            ((LivingEntity) entityIn).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 60, 1));
+        return super.attackEntityAsMob(entityIn);
     }
 
     @Override
@@ -124,20 +135,6 @@ public class WildenStalker extends CreatureEntity implements IAnimatable, IAnima
         }
     }
     private <E extends Entity> PlayState flyPredicate(AnimationEvent event) {
-//        AnimationController controller = event.getController();
-//        if(controller.getCurrentAnimation() != null)
-//            System.out.println(controller.getCurrentAnimation().animationName);
-//        if(controller.getCurrentAnimation() != null && (controller.getCurrentAnimation().animationName.equals("dive"))){
-//            System.out.println("returning");
-//            return PlayState.CONTINUE;
-//        }
-//        System.out.println(isFlying());
-//        if(isFlying()){
-//            controller.setAnimation(new AnimationBuilder().addAnimation("flying"));
-//        }else{
-//            System.out.println("setting no fly");
-//            controller.setAnimation(new AnimationBuilder().addAnimation("idle"));
-//        }
         return isFlying() ? PlayState.CONTINUE : PlayState.STOP;
     }
 
@@ -197,6 +194,15 @@ public class WildenStalker extends CreatureEntity implements IAnimatable, IAnima
 
         this.func_233629_a_(this, false);
     }
+
+    public static AttributeModifierMap.MutableAttribute getAttributes(){
+        return MobEntity.func_233666_p_()
+                .createMutableAttribute(Attributes.MAX_HEALTH, 15D)
+                .createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.25D)
+                .createMutableAttribute(Attributes.ATTACK_KNOCKBACK, 0.7D)
+                .createMutableAttribute(Attributes.ATTACK_DAMAGE, 2.5D);
+    }
+
 
     @Override
     protected void registerData() {

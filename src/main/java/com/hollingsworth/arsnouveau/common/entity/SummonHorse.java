@@ -1,5 +1,6 @@
 package com.hollingsworth.arsnouveau.common.entity;
 
+import com.hollingsworth.arsnouveau.api.entity.ISummon;
 import com.hollingsworth.arsnouveau.client.particle.ParticleUtil;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -9,11 +10,12 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-public class SummonHorse extends HorseEntity {
+public class SummonHorse extends HorseEntity implements ISummon {
     public int ticksLeft;
     public SummonHorse(EntityType<? extends HorseEntity> type, World worldIn) {
         super(type, worldIn);
@@ -37,8 +39,15 @@ public class SummonHorse extends HorseEntity {
             if(ticksLeft <= 0) {
                 ParticleUtil.spawnPoof((ServerWorld) world, getPosition());
                 this.remove();
+                onSummonDeath(world, null, true);
             }
         }
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+        super.onDeath(cause);
+        onSummonDeath(world, cause, false);
     }
 
     @Override
@@ -67,6 +76,15 @@ public class SummonHorse extends HorseEntity {
     }
 
     @Override
+    public boolean canBreed() {
+        return false;
+    }
+
+    @Override
+    public boolean isBreedingItem(ItemStack stack) {
+        return false;
+    }
+    @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
         this.ticksLeft = compound.getInt("left");
@@ -76,5 +94,15 @@ public class SummonHorse extends HorseEntity {
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
         compound.putInt("left", ticksLeft);
+    }
+
+    @Override
+    public int getTicksLeft() {
+        return ticksLeft;
+    }
+
+    @Override
+    public void setTicksLeft(int ticks) {
+        this.ticksLeft = ticks;
     }
 }

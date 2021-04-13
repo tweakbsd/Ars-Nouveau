@@ -105,6 +105,12 @@ public class ItemsRegistry {
     @ObjectHolder(LibItemNames.SPLIT_ARROW)public static SpellArrow SPLIT_ARROW;
     @ObjectHolder(LibItemNames.PIERCE_ARROW)public static SpellArrow PIERCE_ARROW;
 
+    @ObjectHolder(LibItemNames.WILDEN_HORN)public static ModItem WILDEN_HORN;
+    @ObjectHolder(LibItemNames.WILDEN_SPIKE)public static ModItem WILDEN_SPIKE;
+    @ObjectHolder(LibItemNames.WILDEN_WING)public static ModItem WILDEN_WING;
+
+
+    @ObjectHolder(LibItemNames.POTION_FLASK)public static PotionFlask POTION_FLASK;
 
     public static Food MANA_BERRY_FOOD = (new Food.Builder()).hunger(2).saturation(0.1F).effect(() -> new EffectInstance(ModPotions.MANA_REGEN_EFFECT, 100), 1.0f).setAlwaysEdible().build();
 
@@ -154,7 +160,7 @@ public class ItemsRegistry {
                     new BeltOfLevitation(),
                     new WarpScroll(),
                     new JarOfLight(),
-                    new WornNotebook(),
+                    new WornNotebook().withTooltip(new TranslationTextComponent("tooltip.worn_notebook")),
                     new CarbuncleCharm(),
                     new ModItem(LibItemNames.CARBUNCLE_SHARD).withTooltip(new TranslationTextComponent("tooltip.carbuncle_shard")),
                     new WixieCharm(),
@@ -186,8 +192,6 @@ public class ItemsRegistry {
                     new ModItem(LibItemNames.SYLPH_SHARD).withTooltip(new TranslationTextComponent("tooltip.sylph_shard")),
                     new SylphCharm(),
                     new ModItem(LibItemNames.MANA_GEM).withTooltip(new TranslationTextComponent("tooltip.mana_gem")),
-             //       new ModItem(LibItemNames.WIXIE_SHARD),
-
                     new ItemScroll(LibItemNames.ALLOW_ITEM_SCROLL),
                     new ItemScroll(LibItemNames.DENY_ITEM_SCROLL),
                     new ModItem(LibItemNames.BLANK_PARCHMENT),
@@ -198,7 +202,12 @@ public class ItemsRegistry {
                     new SpellBow().setRegistryName(LibItemNames.SPELL_BOW),
                     new FormSpellArrow(LibItemNames.PIERCE_ARROW, new AugmentPierce(), 2),
                     new FormSpellArrow(LibItemNames.SPLIT_ARROW, new AugmentSplit(), 2),
-                    new SpellArrow(LibItemNames.AMPLIFY_ARROW, new AugmentAmplify(), 2)
+                    new SpellArrow(LibItemNames.AMPLIFY_ARROW, new AugmentAmplify(), 2),
+                    new ModItem(LibItemNames.WILDEN_HORN).withTooltip(new TranslationTextComponent("tooltip.wilden_horn")),
+                    new ModItem(LibItemNames.WILDEN_WING).withTooltip(new TranslationTextComponent("tooltip.wilden_wing")),
+                    new ModItem(LibItemNames.WILDEN_SPIKE).withTooltip(new TranslationTextComponent("tooltip.wilden_spike")),
+                    new PotionFlask()
+
             };
 
             final IForgeRegistry<Item> registry = event.getRegistry();

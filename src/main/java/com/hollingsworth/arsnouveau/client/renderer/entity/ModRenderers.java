@@ -3,6 +3,7 @@ package com.hollingsworth.arsnouveau.client.renderer.entity;
 import com.hollingsworth.arsnouveau.ArsNouveau;
 import com.hollingsworth.arsnouveau.common.entity.ModEntities;
 import net.minecraft.client.renderer.entity.HorseRenderer;
+import net.minecraft.client.renderer.entity.LightningBoltRenderer;
 import net.minecraft.client.renderer.entity.TippedArrowRenderer;
 import net.minecraft.client.renderer.entity.WolfRenderer;
 import net.minecraft.util.ResourceLocation;
@@ -28,10 +29,11 @@ public class ModRenderers {
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.ENTITY_SYLPH_TYPE, SylphRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.ENTITY_WIXIE_TYPE, WixieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.WILDEN_STALKER,renderManager -> new GenericRenderer(renderManager, new WildenStalkerModel()));
+        RenderingRegistry.registerEntityRenderingHandler(ModEntities.WILDEN_GUARDIAN, WildenGuardianRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.WILDEN_HUNTER, WildenRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.SUMMON_WOLF, WolfRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.SUMMON_HORSE, HorseRenderer::new);
-
+        RenderingRegistry.registerEntityRenderingHandler(ModEntities.LIGHTNING_ENTITY, LightningBoltRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.ENTITY_FLYING_ITEM,
                 RenderFlyingItem::new);
 

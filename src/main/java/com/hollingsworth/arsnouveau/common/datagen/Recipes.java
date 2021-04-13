@@ -192,16 +192,16 @@ public class Recipes extends RecipeProvider {
 
             ShapelessRecipeBuilder.shapelessRecipe(ItemsRegistry.ALLOW_ITEM_SCROLL, 1).addCriterion("has_journal", InventoryChangeTrigger.Instance.forItems(ItemsRegistry.wornNotebook))
                     .addIngredient(ItemsRegistry.BLANK_PARCHMENT, 1)
-                    .addIngredient(Items.CHEST, 1)
+                    .addIngredient(Ingredient.fromTag(Tags.Items.CHESTS), 1)
                     .build(consumer);
 
             ShapelessRecipeBuilder.shapelessRecipe(ItemsRegistry.DENY_ITEM_SCROLL, 1).addCriterion("has_journal", InventoryChangeTrigger.Instance.forItems(ItemsRegistry.wornNotebook))
                     .addIngredient(ItemsRegistry.BLANK_PARCHMENT, 1)
-                    .addIngredient(Items.COBBLESTONE, 1)
+                    .addIngredient(Ingredient.fromTag(Tags.Items.COBBLESTONE), 1)
                     .build(consumer);
 
             ShapelessRecipeBuilder.shapelessRecipe(ItemsRegistry.warpScroll).addCriterion("has_journal", InventoryChangeTrigger.Instance.forItems(ItemsRegistry.wornNotebook))
-                    .addIngredient(Items.LAPIS_LAZULI, 4).addIngredient(ItemsRegistry.BLANK_PARCHMENT).addIngredient(MANA_GEM, 4)
+                    .addIngredient(Ingredient.fromTag(Tags.Items.GEMS_LAPIS), 4).addIngredient(ItemsRegistry.BLANK_PARCHMENT).addIngredient(MANA_GEM, 4)
                     .build(consumer);
 
             ShapedRecipeBuilder.shapedRecipe(BlockRegistry.VOLCANIC_BLOCK).addCriterion("has_journal",InventoryChangeTrigger.Instance.forItems(ItemsRegistry.wornNotebook))
@@ -232,6 +232,11 @@ public class Recipes extends RecipeProvider {
             shapedWoodenTrapdoor(consumer, BlockRegistry.ARCHWOOD_TRAPDOOR, BlockRegistry.ARCHWOOD_PLANK);
             shapelessBuilder(BlockRegistry.MANA_GEM_BLOCK,1).addIngredient(MANA_GEM, 9).build(consumer);
             shapelessBuilder(ItemsRegistry.manaGem, 9).addIngredient(BlockRegistry.MANA_GEM_BLOCK,1).build(consumer, new ResourceLocation(ArsNouveau.MODID, "mana_gem_2"));
+            shapelessBuilder(Items.LEATHER, 1).addIngredient(ItemsRegistry.WILDEN_WING).build(consumer,  new ResourceLocation(ArsNouveau.MODID, "wing_to_leather"));
+            shapelessBuilder(Items.BONE_MEAL, 3).addIngredient(ItemsRegistry.WILDEN_HORN).build(consumer,  new ResourceLocation(ArsNouveau.MODID, "horn_to_bonemeal"));
+            shapelessBuilder(Items.ORANGE_DYE, 5).addIngredient(ItemsRegistry.WILDEN_SPIKE).build(consumer,  new ResourceLocation(ArsNouveau.MODID, "spike_to_dye"));
+
+
         }
     }
 
@@ -295,6 +300,11 @@ public class Recipes extends RecipeProvider {
                 .addCriterion("has_journal",InventoryChangeTrigger.Instance.forItems(ItemsRegistry.wornNotebook))
                 .build(recipeConsumer);
     }
+
+    public ShapelessRecipeBuilder shapelessBuilder(IItemProvider result){
+        return shapelessBuilder(result, 1);
+    }
+
     public ShapelessRecipeBuilder shapelessBuilder(IItemProvider result, int resultCount){
         return ShapelessRecipeBuilder.shapelessRecipe(result, resultCount).addCriterion("has_journal", InventoryChangeTrigger.Instance.forItems(ItemsRegistry.wornNotebook));
     }
