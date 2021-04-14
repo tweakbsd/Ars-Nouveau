@@ -4,7 +4,6 @@ import com.hollingsworth.arsnouveau.api.client.ITooltipProvider;
 import com.hollingsworth.arsnouveau.api.entity.IDispellable;
 import com.hollingsworth.arsnouveau.api.spell.IPickupResponder;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
-
 import com.hollingsworth.arsnouveau.api.util.NBTUtil;
 import com.hollingsworth.arsnouveau.client.particle.ParticleUtil;
 import com.hollingsworth.arsnouveau.common.block.tile.SummoningCrystalTile;
@@ -17,12 +16,15 @@ import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.controller.FlyingMovementController;
-import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.goal.LookRandomlyGoal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -37,7 +39,6 @@ import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -106,7 +107,7 @@ public class EntitySylph extends AbstractFlyingCreature implements IPickupRespon
             List<ItemStack> items = ItemsRegistry.DENY_ITEM_SCROLL.getItems(stack);
             if (!items.isEmpty()) {
                 this.ignoreItems = ItemsRegistry.DENY_ITEM_SCROLL.getItems(stack);
-                PortUtil.sendMessage(player, new StringTextComponent("Sylph will ignore these items"));
+                PortUtil.sendMessage(player, new TranslationTextComponent("ars_nouveau.sylph.ignore"));
             }
         }
         return super.func_230254_b_(player,hand);
@@ -143,7 +144,7 @@ public class EntitySylph extends AbstractFlyingCreature implements IPickupRespon
             }
             if(ignoreItems != null && !ignoreItems.isEmpty()) {
                 StringBuilder status = new StringBuilder();
-                status.append("Ignoring: ");
+                status.append(new TranslationTextComponent("ars_nouveau.sylph.ignore_list").getString());
                 for (ItemStack i : ignoreItems) {
                     status.append(i.getDisplayName().getString()).append(" ");
                 }
@@ -292,7 +293,7 @@ public class EntitySylph extends AbstractFlyingCreature implements IPickupRespon
 
     public List<PrioritizedGoal> getUntamedGoals(){
         List<PrioritizedGoal> list = new ArrayList<>();
-        list.add(new PrioritizedGoal(3, new FollowMobGoal(this, 1.0D, 3.0F, 7.0F)));
+        list.add(new PrioritizedGoal(3, new FollowMobGoalBackoff(this, 1.0D, 3.0F, 7.0F, 0.5f)));
         list.add(new PrioritizedGoal(5, new FollowPlayerGoal(this, 1.0D, 3.0F, 7.0F)));
         list.add(new PrioritizedGoal(2, new LookRandomlyGoal(this)));
         list.add(new PrioritizedGoal(2, new WaterAvoidingRandomFlyingGoal(this, 1.0D)));
@@ -318,16 +319,16 @@ public class EntitySylph extends AbstractFlyingCreature implements IPickupRespon
         if(!this.dataManager.get(TAMED))
             return tooltip;
         int mood = this.dataManager.get(MOOD_SCORE);
-        String moodStr = "Very unhappy";
+        String moodStr = new TranslationTextComponent("ars_nouveau.sylph.tooltip_unhappy").getString();
         if(mood >= 1000)
-            moodStr = "Extremely happy";
+            moodStr = new TranslationTextComponent("ars_nouveau.sylph.tooltip_extremely_happy").getString();
         else if(mood >= 750)
-            moodStr = "Very happy";
+            moodStr = new TranslationTextComponent("ars_nouveau.sylph.tooltip_very_happy").getString();
         else if(mood >= 500)
-            moodStr = "Happy";
+            moodStr = new TranslationTextComponent("ars_nouveau.sylph.tooltip_happy").getString();
         else if(mood >= 250)
-            moodStr = "Content";
-        tooltip.add("Mood: " + moodStr);
+            moodStr = new TranslationTextComponent("ars_nouveau.sylph.tooltip_content").getString();
+        tooltip.add(new TranslationTextComponent("ars_nouveau.sylph.tooltip_mood").getString() + moodStr);
         return tooltip;
     }
 

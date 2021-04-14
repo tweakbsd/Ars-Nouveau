@@ -1,5 +1,6 @@
 package com.hollingsworth.arsnouveau.common.items;
 
+import com.hollingsworth.arsnouveau.common.block.tile.PotionJarTile;
 import com.hollingsworth.arsnouveau.common.lib.LibItemNames;
 import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -9,7 +10,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.util.ActionResult;
@@ -20,18 +23,79 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class PotionFlask extends Item {
+public abstract class PotionFlask extends ModItem {
     public PotionFlask() {
         super(ItemsRegistry.defaultItemProperties().maxStackSize(1));
         setRegistryName(LibItemNames.POTION_FLASK);
     }
 
+    public PotionFlask(Item.Properties props, String registryName){
+        super(props);
+        setRegistryName(registryName);
+    }
+
+    public PotionFlask(String registryName){
+        super(ItemsRegistry.defaultItemProperties().maxStackSize(1));
+        setRegistryName(registryName);
+    }
+
     @Override
     public ActionResultType onItemUse(ItemUseContext context) {
+        if(context.getWorld().isRemote)
+            return super.onItemUse(context);
+        ItemStack thisStack = context.getItem();
+        Potion potion = PotionUtils.getPotionFromItem(thisStack);
+        PlayerEntity playerEntity = context.getPlayer();
+        if(!(context.getWorld().getTileEntity(context.getPos()) instanceof PotionJarTile))
+            return super.onItemUse(context);
+        PotionJarTile jarTile = (PotionJarTile) context.getWorld().getTileEntity(context.getPos());
+        int count = thisStack.getTag().getInt("count");
+        if(jarTile == null)
+            return ActionResultType.PASS;
+        if(playerEntity.isSneaking() && potion != Potions.EMPTY && count > 0 && jarTile.getMaxFill() - jarTile.getCurrentFill() >= 0){
+            if(jarTile.getPotion() == Potions.EMPTY || jarTile.isMixEqual(thisStack)){
+                if(jarTile.getPotion() == Potions.EMPTY) {
+                    jarTile.setPotion(potion, PotionUtils.getEffectsFromStack(thisStack));
+                }
+                jarTile.addAmount(100);
+                thisStack.getTag().putInt("count", count - 1);
+                setCount(thisStack, count -1);
+            }
+        }
+
+        if(context.getWorld().getTileEntity(context.getPos()) instanceof PotionJarTile && !playerEntity.isSneaking() && !isMax(thisStack)){
+
+            if(jarTile.getPotion() != Potions.EMPTY && (jarTile.isMixEqual(thisStack) || potion == Potions.EMPTY) && jarTile.getAmount() >= 100){
+                if(potion == Potions.EMPTY) {
+                    PotionUtils.addPotionToItemStack(thisStack, jarTile.getPotion());
+                    PotionUtils.appendEffects(thisStack, jarTile.getCustomEffects());
+                }
+                setCount(thisStack, 1 + count);
+                jarTile.addAmount(-100);
+            }
+        }
         return super.onItemUse(context);
+    }
+
+    public boolean isMax(ItemStack stack){
+
+        return stack.getOrCreateTag().getInt("count") >= getMaxCapacity();
+    }
+
+    public int getMaxCapacity(){
+        return 8;
+    }
+
+    public void setCount(ItemStack stack, int count){
+        stack.getTag().putInt("count", count);
+        if(count <= 0) {
+            PotionUtils.addPotionToItemStack(stack, Potions.EMPTY);
+            stack.getTag().remove("CustomPotionEffects");
+        }
     }
 
     @Override
@@ -43,6 +107,7 @@ public class PotionFlask extends Item {
 
         if (!worldIn.isRemote) {
             for(EffectInstance effectinstance : PotionUtils.getEffectsFromStack(stack)) {
+                effectinstance = getEffectInstance(effectinstance);
                 if (effectinstance.getPotion().isInstant()) {
                     effectinstance.getPotion().affectEntity(playerentity, playerentity, entityLiving, effectinstance.getAmplifier(), 1.0D);
                 } else {
@@ -51,24 +116,22 @@ public class PotionFlask extends Item {
             }
             if(stack.hasTag()){
                 int count = stack.getTag().getInt("count") - 1;
-                if(count <= 0){
-                    PotionUtils.addPotionToItemStack(stack, Potions.EMPTY);
-                    stack.getTag().putInt("count", 0);
-                }else{
-                    stack.getTag().putInt("count", count);
-                }
-
+                setCount(stack, count);
             }
         }
         return stack;
     }
+
+    //Get the modified EffectInstance from the parent class.
+    public abstract @Nonnull EffectInstance getEffectInstance(EffectInstance effectInstance);
 
     @Override
     public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
         super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
         if(!worldIn.isRemote){
          //   PotionUtils.addPotionToItemStack(stack, Potions.WEAKNESS);
-
+            if(!stack.hasTag())
+                stack.setTag(new CompoundNBT());
         }
     }
 

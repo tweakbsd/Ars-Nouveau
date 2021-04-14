@@ -37,7 +37,6 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -59,7 +58,7 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
     public BlockPos crystalPos;
     public int ticksSinceLastSpell;
     public List<AbstractSpellPart> spellRecipe;
-
+    private int backoffTicks;
     @Override
     public boolean canDespawn(double p_213397_1_) {
         return false;
@@ -99,23 +98,23 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
             if(new EntitySpellResolver(spellParts, new SpellContext(spellParts, this)).canCast(this)) {
                 this.spellRecipe = SpellParchment.getSpellRecipe(stack);
                 setRecipeString(SpellRecipeUtil.serializeForNBT(spellRecipe));
-                player.sendMessage(new StringTextComponent("Spell set."), Util.DUMMY_UUID);
+                player.sendMessage(new TranslationTextComponent("ars_nouveau.whelp.spell_set"), Util.DUMMY_UUID);
                 return ActionResultType.SUCCESS;
             } else{
-                player.sendMessage(new StringTextComponent("A whelp cannot cast an invalid spell."), Util.DUMMY_UUID);
+                player.sendMessage(new TranslationTextComponent("ars_nouveau.whelp.invalid"), Util.DUMMY_UUID);
                 return ActionResultType.SUCCESS;
             }
         }else if(stack == ItemStack.EMPTY){
             if(spellRecipe == null || spellRecipe.size() == 0){
-                player.sendMessage(new StringTextComponent("Give this whelp a spell by giving it some inscribed Spell Parchment. "), Util.DUMMY_UUID);
+                player.sendMessage(new TranslationTextComponent("ars_nouveau.whelp.desc"), Util.DUMMY_UUID);
             }else
-                player.sendMessage(new StringTextComponent("This whelp is casting " + SpellRecipeUtil.getDisplayString(spellRecipe)), Util.DUMMY_UUID);
+                player.sendMessage(new TranslationTextComponent("ars_nouveau.whelp.casting", SpellRecipeUtil.getDisplayString(spellRecipe)), Util.DUMMY_UUID);
             return ActionResultType.SUCCESS;
         }
 
         if(!stack.isEmpty()){
             setHeldStack(new ItemStack(stack.getItem()));
-            player.sendMessage(new StringTextComponent("This whelp will use " + stack.getItem().getDisplayName(stack).getString() +  " in spells if this item is in a Summoning Crystal chest."), Util.DUMMY_UUID);
+            player.sendMessage(new TranslationTextComponent("ars_nouveau.whelp.spell_item", stack.getItem().getDisplayName(stack).getString()), Util.DUMMY_UUID);
         }
         return super.func_230254_b_(player,  hand);
 
@@ -138,6 +137,10 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
         if(world == null || this.dead || crystalPos == null)
             return;
         ticksSinceLastSpell += 1;
+        if(!world.isRemote){
+            if(backoffTicks >= 0)
+                backoffTicks--;
+        }
 
         if(world.getGameTime() % 20 == 0) {
             if (!(world.getTileEntity(crystalPos) instanceof SummoningCrystalTile)) {
@@ -174,8 +177,16 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
         this.goalSelector.addGoal(8, new LookRandomlyGoal(this));
     }
 
+    private boolean isBackedOff(){
+        if(backoffTicks <= 0) {
+            backoffTicks = 60;
+            return false;
+        }
+        return true;
+    }
+
     public boolean canPerformAnotherTask(){
-        return ticksSinceLastSpell > 60 && new EntitySpellResolver(spellRecipe, new SpellContext(spellRecipe, this)).canCast(this);
+        return !isBackedOff() && ticksSinceLastSpell > 60 && new EntitySpellResolver(spellRecipe, new SpellContext(spellRecipe, this)).canCast(this);
     }
 
     public @Nullable BlockPos getTaskLoc(){
@@ -233,11 +244,13 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
         List<String> list = new ArrayList<>();
         List<AbstractSpellPart> spellParts = SpellRecipeUtil.getSpellsFromTagString(this.getRecipeString());
         String spellString = spellParts.size() > 4 ? SpellRecipeUtil.getDisplayString(spellParts.subList(0, 4)) + "..." :SpellRecipeUtil.getDisplayString(spellParts);
-        String itemString = this.getHeldStack() == ItemStack.EMPTY ? "Nothing." : this.getHeldStack().getDisplayName().getString();
-        String itemAction = this.getHeldStack().getItem() instanceof BlockItem ? "Placing: " : "Using: ";
-        list.add("Casting: " + spellString);
+        String itemString = this.getHeldStack() == ItemStack.EMPTY ? new TranslationTextComponent("ars_nouveau.whelp.no_item").getString() : this.getHeldStack().getDisplayName().getString();
+        String itemAction = this.getHeldStack().getItem() instanceof BlockItem ? 
+        		new TranslationTextComponent("ars_nouveau.whelp.placing").getString() : 
+        		new TranslationTextComponent("ars_nouveau.whelp.using").getString();
+        list.add(new TranslationTextComponent("ars_nouveau.whelp.spell").getString() + spellString);
         list.add(itemAction + itemString);
-        list.add("Strict mode: " + this.dataManager.get(STRICT_MODE));
+        list.add(new TranslationTextComponent("ars_nouveau.whelp.strict").getString() + new TranslationTextComponent("ars_nouveau." + this.dataManager.get(STRICT_MODE)).getString() );
         return list;
     }
 
@@ -264,7 +277,7 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
             getHeldStack().write(itemTag);
             tag.put("held", itemTag);
         }
-
+        tag.putInt("backoff", backoffTicks);
         tag.putBoolean("strict", this.dataManager.get(STRICT_MODE));
     }
 
@@ -312,6 +325,7 @@ public class EntityWhelp extends FlyingEntity implements IPickupResponder, IPlac
 
         setRecipeString(SpellRecipeUtil.serializeForNBT(spellRecipe));
         this.dataManager.set(STRICT_MODE, tag.getBoolean("strict"));
+        this.backoffTicks = tag.getInt("backoff");
     }
 
     /**
