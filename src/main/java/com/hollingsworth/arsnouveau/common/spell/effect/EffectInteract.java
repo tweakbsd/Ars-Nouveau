@@ -38,26 +38,26 @@ public class EffectInteract extends AbstractEffect {
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         if(rayTraceResult instanceof BlockRayTraceResult) {
             BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) rayTraceResult;
-            BlockPos blockPos = blockRayTraceResult.getPos();
+            BlockPos blockPos = blockRayTraceResult.getBlockPos();
             BlockState blockState = world.getBlockState(blockPos);
 
             if(isRealPlayer(shooter)) {
-                blockState.onBlockActivated(world, (PlayerEntity) shooter, Hand.MAIN_HAND, (BlockRayTraceResult) rayTraceResult);
+                blockState.use(world, (PlayerEntity) shooter, Hand.MAIN_HAND, (BlockRayTraceResult) rayTraceResult);
             } else if(world instanceof ServerWorld){
                 FakePlayer player = new ANFakePlayer((ServerWorld) world);
                 // NOTE: Get IInteractResponder held item if we have one
                 ItemStack stack = shooter instanceof IInteractResponder ? ((IInteractResponder)shooter).getHeldItem().copy() : ItemStack.EMPTY;
-                player.setHeldItem(Hand.MAIN_HAND, stack);
+                player.setItemInHand(Hand.MAIN_HAND, stack);
 
-                blockState.onBlockActivated(world, player, Hand.MAIN_HAND, (BlockRayTraceResult)rayTraceResult);
+                blockState.use(world, player, Hand.MAIN_HAND, (BlockRayTraceResult)rayTraceResult);
 
                 // NOTE: Return all items that were used by the fake player
                 // NOTE: Returning of items should probably not only be done for shears. But for now it's better than not returning shears
                 List<ItemStack> items = new ArrayList<>();
-                if(player.getHeldItemMainhand().getItem() instanceof ShearsItem) {
-                    items.addAll(player.inventory.mainInventory);
-                    items.addAll(player.inventory.armorInventory);
-                    items.addAll(player.inventory.offHandInventory);
+                if(player.getMainHandItem().getItem() instanceof ShearsItem) {
+                    items.addAll(player.inventory.items);
+                    items.addAll(player.inventory.armor);
+                    items.addAll(player.inventory.offhand);
                     returnItems(rayTraceResult, world, shooter, augments, spellContext, items);
                 }
 
@@ -68,23 +68,23 @@ public class EffectInteract extends AbstractEffect {
 
             if(e instanceof AnimalEntity){
                 if(shooter instanceof PlayerEntity){
-                    ((AnimalEntity) e).func_230254_b_((PlayerEntity) shooter, Hand.MAIN_HAND);
+                    ((AnimalEntity) e).mobInteract((PlayerEntity) shooter, Hand.MAIN_HAND);
 
                 }else if (shooter instanceof IInteractResponder){
                     FakePlayer fakePlayer = FakePlayerFactory.getMinecraft((ServerWorld)world);
-                    fakePlayer.inventory.clear();
-                    fakePlayer.setPosition(e.getPosX(), e.getPosY(), e.getPosZ());
+                    fakePlayer.inventory.clearContent();
+                    fakePlayer.setPos(e.getX(), e.getY(), e.getZ());
                     ItemStack stack = ((IInteractResponder) shooter).getHeldItem().copy();
-                    fakePlayer.setHeldItem(Hand.MAIN_HAND, stack);
-                    e.processInitialInteract( fakePlayer, Hand.MAIN_HAND);
+                    fakePlayer.setItemInHand(Hand.MAIN_HAND, stack);
+                    e.interact( fakePlayer, Hand.MAIN_HAND);
                     List<ItemStack> items = new ArrayList<>();
-                    if(e instanceof IForgeShearable && fakePlayer.getHeldItemMainhand().getItem() instanceof ShearsItem && ((IForgeShearable) e).isShearable(fakePlayer.getHeldItemMainhand(), world, e.getPosition())){
-                        items.addAll(((IForgeShearable) e).onSheared(fakePlayer, fakePlayer.getHeldItemMainhand(), world, e.getPosition(),
-                                EnchantmentHelper.getEnchantmentLevel(net.minecraft.enchantment.Enchantments.FORTUNE,fakePlayer.getHeldItemMainhand())));
+                    if(e instanceof IForgeShearable && fakePlayer.getMainHandItem().getItem() instanceof ShearsItem && ((IForgeShearable) e).isShearable(fakePlayer.getMainHandItem(), world, e.blockPosition())){
+                        items.addAll(((IForgeShearable) e).onSheared(fakePlayer, fakePlayer.getMainHandItem(), world, e.blockPosition(),
+                                EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.enchantment.Enchantments.BLOCK_FORTUNE,fakePlayer.getMainHandItem())));
                     }
-                    items.addAll(fakePlayer.inventory.mainInventory);
-                    items.addAll(fakePlayer.inventory.armorInventory);
-                    items.addAll(fakePlayer.inventory.offHandInventory);
+                    items.addAll(fakePlayer.inventory.items);
+                    items.addAll(fakePlayer.inventory.armor);
+                    items.addAll(fakePlayer.inventory.offhand);
                     returnItems(rayTraceResult, world, shooter, augments, spellContext, items);
                 }
             }
@@ -96,9 +96,9 @@ public class EffectInteract extends AbstractEffect {
             if(shooter instanceof IPickupResponder){
                 ItemStack leftOver = ((IPickupResponder) shooter).onPickup(i);
                 if(!leftOver.isEmpty())
-                    world.addEntity(new ItemEntity(world, rayTraceResult.getHitVec().x, rayTraceResult.getHitVec().y, rayTraceResult.getHitVec().z, leftOver));
+                    world.addFreshEntity(new ItemEntity(world, rayTraceResult.getLocation().x, rayTraceResult.getLocation().y, rayTraceResult.getLocation().z, leftOver));
             }else{
-                world.addEntity(new ItemEntity(world, rayTraceResult.getHitVec().x, rayTraceResult.getHitVec().y, rayTraceResult.getHitVec().z, i));
+                world.addFreshEntity(new ItemEntity(world, rayTraceResult.getLocation().x, rayTraceResult.getLocation().y, rayTraceResult.getLocation().z, i));
             }
         }
     }

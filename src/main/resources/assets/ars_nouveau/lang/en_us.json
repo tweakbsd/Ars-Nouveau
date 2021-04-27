@@ -150,6 +150,7 @@
 	"ars_nouveau.page5.sylph_charm":"Note: It can take several minutes for a sylph to update its mood after placing a block. Sylphs value diversity, and too much of one block will no longer count.",
 	"ars_nouveau.page6.sylph_charm": "Drop rates are determined by happiness, diversity, and the proportions of blocks in a Sylph home. For example, to generate a lot of logs, grow more trees. To gain more seeds and crop harvests, plant more crops. Giving a Sylph Item Scroll:Deny will cause the sylph will no longer produce that material.",
 	"entity.ars_nouveau.sylph":"Sylph",
+	"entity.ars_nouveau.ally_vex":"Summoned Vex",
 	"block.ars_nouveau.arcane_stone":"Arcane Stone",
 	"block.ars_nouveau.ab_alternating":"Arcane Brick: Alternative",
 	"block.ars_nouveau.ab_herring":"Arcane Brick: Herringbone",
