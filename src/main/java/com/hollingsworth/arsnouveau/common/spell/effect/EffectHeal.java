@@ -17,8 +17,6 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
-
 public class EffectHeal extends AbstractEffect {
     public EffectHeal() {
         super(GlyphLib.EffectHealID, "Heal");
@@ -31,13 +29,17 @@ public class EffectHeal extends AbstractEffect {
             if(entity.removed || entity.getHealth() <= 0)
                 return;
 
-            float maxHealth = entity.getMaxHealth();
             float healVal = 3.0f + 3 * getBuffCount(augments, AugmentAmplify.class);
             if(getBuffCount(augments, AugmentExtendTime.class) > 0){
                 applyPotionWithCap(entity, Effects.REGENERATION, augments, 5, 5, 5);
             }else{
-                entity.setHealth(entity.getHealth() + healVal > maxHealth ? entity.getMaxHealth() : entity.getHealth() + healVal);
+                if(entity.isInvertedHealAndHarm()){
+                    dealDamage(world, shooter, healVal, augments, entity, buildDamageSource(world, shooter).setMagic());
+                }else{
+                    entity.heal(healVal);
+                }
             }
+
         }
 
     }
@@ -49,7 +51,7 @@ public class EffectHeal extends AbstractEffect {
 
     @Override
     public int getManaCost() {
-        return 40;
+        return 100;
     }
 
     @Override
@@ -65,6 +67,6 @@ public class EffectHeal extends AbstractEffect {
 
     @Override
     public String getBookDescription() {
-        return "Heals a small amount of health for the target. When used with Extend Time, the Regeneration buff is applied instead, up to level 5.";
+        return "Heals a small amount of health for the target. When used with Extend Time, the Regeneration buff is applied instead, up to level 5. When used on Undead, the spell will deal an equal amount of magic damage.";
     }
 }

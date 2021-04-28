@@ -114,6 +114,7 @@ public class ItemsRegistry {
     @ObjectHolder(LibItemNames.POTION_FLASK)public static PotionFlask POTION_FLASK;
     @ObjectHolder(LibItemNames.POTION_FLASK_AMPLIFY)public static PotionFlask POTION_FLASK_AMPLIFY;
     @ObjectHolder(LibItemNames.POTION_FLASK_EXTEND_TIME)public static PotionFlask POTION_FLASK_EXTEND_TIME;
+    @ObjectHolder(LibItemNames.RITUAL_PARCHMENT)public static RitualParchment RITUAL_PARCHMENT;
 
     public static Food MANA_BERRY_FOOD = (new Food.Builder()).nutrition(2).saturationMod(0.1F).effect(() -> new EffectInstance(ModPotions.MANA_REGEN_EFFECT, 100), 1.0f).alwaysEat().build();
 
@@ -228,7 +229,6 @@ public class ItemsRegistry {
                             return new EffectInstance(effectInstance.getEffect(), effectInstance.getDuration()/2, effectInstance.getAmplifier() + 1);
                         }
                     }.withTooltip(new TranslationTextComponent("tooltip.potion_flask_amplify"))
-
             };
 
             final IForgeRegistry<Item> registry = event.getRegistry();
@@ -236,6 +236,13 @@ public class ItemsRegistry {
                 registry.register(glyph);
                 ITEMS.add(glyph);
             }
+
+            for(RitualParchment ritualParchment : ArsNouveauAPI.getInstance().getRitualItemMap().values()){
+                registry.register(ritualParchment);
+                ITEMS.add(ritualParchment);
+            }
+
+
             for (final Item item : items) {
                 registry.register(item);
                 ITEMS.add(item);

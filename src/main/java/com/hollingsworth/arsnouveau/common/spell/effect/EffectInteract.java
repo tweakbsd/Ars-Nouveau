@@ -3,6 +3,7 @@ package com.hollingsworth.arsnouveau.common.spell.effect;
 import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.ANFakePlayer;
 import com.hollingsworth.arsnouveau.api.spell.*;
+import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -36,25 +37,25 @@ public class EffectInteract extends AbstractEffect {
 
     @Override
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
+
         if(rayTraceResult instanceof BlockRayTraceResult) {
             BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) rayTraceResult;
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             BlockState blockState = world.getBlockState(blockPos);
 
-            if(isRealPlayer(shooter)) {
+            if(!BlockUtil.destroyRespectsClaim(getPlayer(shooter, (ServerWorld) world), world, blockPos))
+                return;
+            if (isRealPlayer(shooter)) {
                 blockState.use(world, (PlayerEntity) shooter, Hand.MAIN_HAND, (BlockRayTraceResult) rayTraceResult);
-            } else if(world instanceof ServerWorld){
+            } else if (world instanceof ServerWorld) {
                 FakePlayer player = new ANFakePlayer((ServerWorld) world);
                 // NOTE: Get IInteractResponder held item if we have one
-                ItemStack stack = shooter instanceof IInteractResponder ? ((IInteractResponder)shooter).getHeldItem().copy() : ItemStack.EMPTY;
+                ItemStack stack = shooter instanceof IInteractResponder ? ((IInteractResponder) shooter).getHeldItem().copy() : ItemStack.EMPTY;
                 player.setItemInHand(Hand.MAIN_HAND, stack);
 
-                blockState.use(world, player, Hand.MAIN_HAND, (BlockRayTraceResult)rayTraceResult);
-
-                // NOTE: Return all items that were used by the fake player
-                // NOTE: Returning of items should probably not only be done for shears. But for now it's better than not returning shears
+                blockState.use(world, player, Hand.MAIN_HAND, (BlockRayTraceResult) rayTraceResult);
                 List<ItemStack> items = new ArrayList<>();
-                if(player.getMainHandItem().getItem() instanceof ShearsItem) {
+                if (player.getMainHandItem().getItem() instanceof ShearsItem) {
                     items.addAll(player.inventory.items);
                     items.addAll(player.inventory.armor);
                     items.addAll(player.inventory.offhand);

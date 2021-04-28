@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
+import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.block.tile.IntangibleAirTile;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
@@ -18,13 +19,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
 
 public class EffectIntangible extends AbstractEffect {
     public EffectIntangible() {
@@ -32,25 +31,24 @@ public class EffectIntangible extends AbstractEffect {
     }
 
     @Override
-    public void onResolve(RayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
-        if(rayTraceResult instanceof BlockRayTraceResult){
-            BlockPos pos = ((BlockRayTraceResult) rayTraceResult).getBlockPos();
-            int aoeBuff = getBuffCount(augments, AugmentAOE.class);
-            int duration = 60 + 20 * getDurationModifier(augments);
+    public void onResolveBlock(BlockRayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
+        super.onResolveBlock(rayTraceResult, world, shooter, augments, spellContext);
+        BlockPos pos =rayTraceResult.getBlockPos();
+        int aoeBuff = getBuffCount(augments, AugmentAOE.class);
+        int duration = 60 + 20 * getDurationModifier(augments);
 
-            List<BlockPos> posList = SpellUtil.calcAOEBlocks(shooter, pos, (BlockRayTraceResult)rayTraceResult,aoeBuff, getBuffCount(augments, AugmentPierce.class));
-            for(BlockPos pos1 : posList) {
-                if(world.getBlockEntity(pos1) != null || world.getBlockState(pos1).getMaterial() == Material.AIR
-                        || world.getBlockState(pos1).getBlock() == Blocks.BEDROCK || !canBlockBeHarvested(augments, world, pos))
-                    continue;
+        List<BlockPos> posList = SpellUtil.calcAOEBlocks(shooter, pos, (BlockRayTraceResult)rayTraceResult,aoeBuff, getBuffCount(augments, AugmentPierce.class));
+        for(BlockPos pos1 : posList) {
+            if (world.getBlockEntity(pos1) != null || world.getBlockState(pos1).getMaterial() == Material.AIR
+                    || world.getBlockState(pos1).getBlock() == Blocks.BEDROCK || !canBlockBeHarvested(augments, world, pos) || !BlockUtil.destroyRespectsClaim(getPlayer(shooter, (ServerWorld) world), world, pos1))
+                continue;
 
-                BlockState state = world.getBlockState(pos1);
-                int id = Block.getId(state);
-                world.setBlockAndUpdate(pos1, BlockRegistry.INTANGIBLE_AIR.defaultBlockState());
-                IntangibleAirTile tile = ((IntangibleAirTile) world.getBlockEntity(pos1));
-                tile.stateID = id;
-                tile.maxLength = duration;
-            }
+            BlockState state = world.getBlockState(pos1);
+            int id = Block.getId(state);
+            world.setBlockAndUpdate(pos1, BlockRegistry.INTANGIBLE_AIR.defaultBlockState());
+            IntangibleAirTile tile = ((IntangibleAirTile) world.getBlockEntity(pos1));
+            tile.stateID = id;
+            tile.maxLength = duration;
         }
     }
 

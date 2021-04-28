@@ -6,9 +6,13 @@ import com.hollingsworth.arsnouveau.api.enchanting_apparatus.IEnchantingRecipe;
 import com.hollingsworth.arsnouveau.api.recipe.GlyphPressRecipe;
 import com.hollingsworth.arsnouveau.api.recipe.PotionIngredient;
 import com.hollingsworth.arsnouveau.api.recipe.VanillaPotionRecipe;
+import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
+import com.hollingsworth.arsnouveau.api.ritual.RitualContext;
 import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
 import com.hollingsworth.arsnouveau.api.spell.ISpellTier;
+import com.hollingsworth.arsnouveau.common.block.tile.RitualTile;
 import com.hollingsworth.arsnouveau.common.items.Glyph;
+import com.hollingsworth.arsnouveau.common.items.RitualParchment;
 import com.hollingsworth.arsnouveau.setup.Config;
 import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.item.Item;
@@ -44,14 +48,21 @@ public class ArsNouveauAPI {
      * Map of all spells to be registered in the spell system
      *
      * key: Unique spell ID. Please make this snake_case!
-     * value: Associated spell
+     * value: Associated glyph
      */
     private HashMap<String, AbstractSpellPart> spell_map;
+
+    private HashMap<String, AbstractRitual> ritualMap;
 
     /**
      * Contains the list of glyph item instances used by the glyph press.
      */
     private HashMap<String, Glyph> glyphMap;
+
+    /**
+     * Contains the list of parchment item instances created during registration
+     */
+    private HashMap<String, RitualParchment> ritualParchmentMap;
 
     private List<IEnchantingRecipe> enchantingApparatusRecipes;
     /**
@@ -84,20 +95,51 @@ public class ArsNouveauAPI {
         return getGlyphItem(spell.tag);
     }
 
-    /**
-     * Returns the glyph that belongs to the crafting reagent given
-     */
-    public Glyph hasCraftingReagent(Item item){
-        return getGlyphMap().values().stream().filter(a->a.spellPart.getCraftingReagent() == item).findFirst().orElse(null);
-    }
 
     public AbstractSpellPart registerSpell(String id, AbstractSpellPart part){
         glyphMap.put(id, new Glyph(getSpellRegistryName(id), part));
         return spell_map.put(id, part);
     }
 
+    /**
+     * A registration helper for addons. Adds mana costs into the fallback cost map.
+     */
+    public AbstractSpellPart registerSpell(String id, AbstractSpellPart part, int manaCost){
+        Config.addonSpellCosts.put(id, manaCost);
+        return registerSpell(id, part);
+    }
+
+    public AbstractRitual registerRitual(String id, AbstractRitual ritual){
+        ritualParchmentMap.put(id, new RitualParchment(getRitualRegistryName(id), ritual));
+        return ritualMap.put(id, ritual);
+    }
+
+    public @Nullable AbstractRitual getRitual(String id){
+        if(!ritualMap.containsKey(id))
+            return null;
+        try{
+            return ritualMap.get(id).getClass().newInstance();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public @Nullable AbstractRitual getRitual(String id, RitualTile tile, RitualContext context){
+        AbstractRitual ritual = getRitual(id);
+        if(ritual != null){
+            ritual.tile = tile;
+            ritual.context = context;
+        }
+        return ritual;
+    }
+
     public String getSpellRegistryName(String id){
         return "glyph_"+ id.toLowerCase();
+    }
+
+    public String getRitualRegistryName(String id){
+        return "ritual_"+ id.toLowerCase();
     }
 
     public Map<String, AbstractSpellPart> getSpell_map() {
@@ -106,6 +148,10 @@ public class ArsNouveauAPI {
 
     public Map<String, Glyph> getGlyphMap(){
         return glyphMap;
+    }
+
+    public Map<String, RitualParchment> getRitualItemMap(){
+        return ritualParchmentMap;
     }
 
 
@@ -168,6 +214,8 @@ public class ArsNouveauAPI {
         glyphMap = new HashMap<>();
         startingSpells = new ArrayList<>();
         enchantingApparatusRecipes = new ArrayList<>();
+        ritualMap = new HashMap<>();
+        ritualParchmentMap = new HashMap<>();
     }
 
     public static ArsNouveauAPI getInstance(){

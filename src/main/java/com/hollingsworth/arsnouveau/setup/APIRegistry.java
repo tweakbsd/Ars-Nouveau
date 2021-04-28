@@ -5,13 +5,12 @@ import com.hollingsworth.arsnouveau.api.ArsNouveauAPI;
 import com.hollingsworth.arsnouveau.api.enchanting_apparatus.IEnchantingRecipe;
 import com.hollingsworth.arsnouveau.api.enchanting_apparatus.ReactiveEnchantmentRecipe;
 import com.hollingsworth.arsnouveau.api.enchanting_apparatus.SpellWriteRecipe;
+import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
 import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
+import com.hollingsworth.arsnouveau.common.ritual.RitualDig;
 import com.hollingsworth.arsnouveau.common.spell.augment.*;
 import com.hollingsworth.arsnouveau.common.spell.effect.*;
-import com.hollingsworth.arsnouveau.common.spell.method.MethodProjectile;
-import com.hollingsworth.arsnouveau.common.spell.method.MethodRune;
-import com.hollingsworth.arsnouveau.common.spell.method.MethodSelf;
-import com.hollingsworth.arsnouveau.common.spell.method.MethodTouch;
+import com.hollingsworth.arsnouveau.common.spell.method.*;
 import net.minecraft.item.ItemStack;
 
 public class APIRegistry {
@@ -112,7 +111,12 @@ public class APIRegistry {
         registerSpell(new EffectCrush());
         registerSpell(new EffectSummonWolves());
         registerSpell(new EffectSummonSteed());
+        registerSpell(new EffectSummonDecoy());
+        registerSpell(new EffectHex());
+        registerSpell(new MethodUnderfoot());
         registerStartingSpells();
+
+        registerRitual(new RitualDig());
     }
 
     public static void registerStartingSpells() {
@@ -129,6 +133,10 @@ public class APIRegistry {
 
     public static void registerSpell(AbstractSpellPart spellPart) {
         ArsNouveauAPI.getInstance().registerSpell(spellPart.getTag(), spellPart);
+    }
+
+    public static void registerRitual(AbstractRitual ritual){
+        ArsNouveauAPI.getInstance().registerRitual(ritual.getID(), ritual);
     }
 
     public static void registerSpell(String id, AbstractSpellPart spellPart) {

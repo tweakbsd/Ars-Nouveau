@@ -10,13 +10,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
 
 public class EffectWither extends AbstractEffect {
     public EffectWither() {
@@ -24,13 +21,12 @@ public class EffectWither extends AbstractEffect {
     }
 
     @Override
-    public void onResolve(RayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
-        if(rayTraceResult instanceof EntityRayTraceResult){
-            Entity entity = ((EntityRayTraceResult) rayTraceResult).getEntity();
-            if(!(entity instanceof LivingEntity))
-                return;
-            applyPotion((LivingEntity) entity, Effects.WITHER,augments);
-        }
+    public void onResolveEntity(EntityRayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
+        super.onResolveEntity(rayTraceResult, world, shooter, augments, spellContext);
+        Entity entity = rayTraceResult.getEntity();
+        if(!(entity instanceof LivingEntity))
+            return;
+        applyPotion((LivingEntity) entity, Effects.WITHER,augments);
     }
 
     @Override
