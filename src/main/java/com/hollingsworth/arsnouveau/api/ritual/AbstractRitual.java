@@ -1,36 +1,38 @@
 package com.hollingsworth.arsnouveau.api.ritual;
 
+import com.hollingsworth.arsnouveau.api.util.BlockUtil;
+import com.hollingsworth.arsnouveau.client.particle.ParticleColor;
 import com.hollingsworth.arsnouveau.common.block.tile.RitualTile;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Random;
 
 public abstract class AbstractRitual {
 
     public RitualTile tile;
-    public RitualContext context;
-    private World world;
-    private BlockPos pos;
+    private RitualContext context;
+
+    public Random rand = new Random();
 
     public AbstractRitual() { }
 
     public AbstractRitual(RitualTile tile, RitualContext context){
         this.tile = tile;
-        this.world = tile.getLevel();
-        this.pos = tile.getBlockPos();
-        this.context = context;
+        this.setContext(context);
     }
 
 
     public void tryTick(){
-        if(tile == null || context == null)
+        if(tile == null || !getContext().isStarted || getContext().isDone) {
             return;
-
-        if(context.isDone)
-            return;
+        }
 
         tick();
     }
@@ -39,17 +41,51 @@ public abstract class AbstractRitual {
         return tile != null ? tile.getBlockPos() : null;
     }
 
+    public @Nullable World getWorld(){return tile != null ? tile.getLevel() : null;}
+
     public boolean canStart(){
         return true;
     }
 
+    public List<ItemStack> getConsumedItems(){
+        return getContext().consumedItems;
+    }
 
-    public void onStart(){}
+    public boolean canConsumeItem(ItemStack stack){
+        return false;
+    }
+
+    public void onItemConsumed(ItemStack stack){
+        this.getConsumedItems().add(stack.copy());
+        stack.shrink(1);
+        System.out.println("update");
+        BlockUtil.safelyUpdateState(getWorld(), tile.getBlockPos());
+    }
+
+    public void incrementProgress(){
+        getContext().progress++;
+    }
+
+    public int getProgress(){
+        return getContext().progress;
+    }
+
+    public void onStart(){
+        getContext().isStarted = true;
+    }
+
+    public boolean isRunning(){
+        return getContext().isStarted && !getContext().isDone;
+    }
+
+    public void setFinished(){
+        getContext().isDone = true;
+    }
 
     protected abstract void tick();
 
     public void onEnd(){
-        this.context.isDone = true;
+        this.getContext().isDone = true;
     }
     /*Must follow rules for the lang file.*/
     public abstract String getID();
@@ -63,14 +99,42 @@ public abstract class AbstractRitual {
     }
 
     public void write(CompoundNBT tag){
-        if(context != null){
-            CompoundNBT contextTag = new CompoundNBT();
-            context.write(contextTag);
-            tag.put("context", contextTag);
-        }
+        CompoundNBT contextTag = new CompoundNBT();
+        getContext().write(contextTag);
+        tag.put("context", contextTag);
     }
     // Called once the ritual tile has created a new instance of this ritual
     public void read(CompoundNBT tag){
-        this.context = RitualContext.read(tag.getCompound("context"));
+        this.setContext(RitualContext.read(tag.getCompound("context")));
+    }
+
+    public @Nonnull RitualContext getContext() {
+        if(context == null)
+            context = new RitualContext();
+        return context;
+    }
+
+    public void setContext(RitualContext context) {
+        this.context = context;
+    }
+
+    public int getCost(){
+        return 0;
+    }
+
+    public ParticleColor getCenterColor(){
+        return new ParticleColor(
+                rand.nextInt(255),
+                rand.nextInt(22),
+                rand.nextInt(255)
+        );
+    }
+
+    public ParticleColor getOuterColor(){
+        return getCenterColor();
+    }
+
+    public int getParticleIntensity(){
+        return 50;
     }
 }
