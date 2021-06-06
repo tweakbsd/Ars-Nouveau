@@ -37,6 +37,7 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -211,16 +212,67 @@ public class WixieCauldronTile extends TileEntity implements ITickableTileEntity
         ItemStack craftingItem = stack;
         RecipeWrapper recipes = new RecipeWrapper();
         if(craftingItem.getItem() == Items.POTION){
-            for(BrewingRecipe r : ArsNouveauAPI.getInstance().getAllPotionRecipes()){
+
+            RecipeWrapper recipesVanilla = new RecipeWrapper();
+            RecipeWrapper recipesNotVanilla = new RecipeWrapper();
+            boolean recipeNotVanillaFound = false;
+            boolean recipeVanillaFound = false;
+
+            for(BrewingRecipe r : ArsNouveauAPI.getInstance().getAllPotionRecipes()) {
+
                 if(ItemStack.matches(stack, r.getOutput())) {
                     isCraftingPotion = true;
                     List<Ingredient> list = new ArrayList<>();
+
                     list.add(new PotionIngredient(r.getInput().getItems()[0]));
                     list.add(r.getIngredient());
-                    recipes.addRecipe(list, r.getOutput(), null);
-                    break;
+
+                    boolean ingredientsContainNonVanillaItems = false;
+                    for (ItemStack item: r.getIngredient().getItems()) {
+
+                        ResourceLocation itemRegistryName = item.getItem().getRegistryName();
+                        try {
+                            if(!itemRegistryName.getNamespace().equals("minecraft")) {
+                                ingredientsContainNonVanillaItems = true;
+                                break;
+                            }
+                        } catch (NullPointerException e) {
+                            // NOTE: Not much we can do if getNamespace() throws...
+                        }
+                    }
+
+                    if(ingredientsContainNonVanillaItems) {
+                        // NOTE: Alredy have a non vanilla recipe
+                        if(recipeNotVanillaFound) {
+                            continue;
+                        }
+
+                        recipesNotVanilla.addRecipe(list, r.getOutput(), null);
+                        recipeNotVanillaFound = true;
+                    } else {
+                        recipesVanilla.addRecipe(list, r.getOutput(), null);
+                        recipeVanillaFound = true;
+                        break;  // NOTE: Got a vanilla recipe. We're done.
+                    }
+
+                    // NOTE: Old code, just use first found recipe and done
+                    // recipes.addRecipe(list, r.getOutput(), null);
+                    // break
                 }
             }
+
+            if(recipeVanillaFound) {
+                // NOTE: Always prefer Vanilla recipe
+                recipes = recipesVanilla;
+            } else {
+
+                // NOTE: No vanilla recipe available, use what we got
+                if(recipeNotVanillaFound) {
+                    recipes = recipesNotVanilla;
+                }
+            }
+
+
         }else {
             for (IRecipe r : level.getServer().getRecipeManager().getRecipes()) {
                 if (r.getResultItem().getItem() != craftingItem.getItem())
