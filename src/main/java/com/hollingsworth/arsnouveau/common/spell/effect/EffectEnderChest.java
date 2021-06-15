@@ -17,26 +17,35 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-
+import java.util.Set;
 
 public class EffectEnderChest extends AbstractEffect {
+    public static EffectEnderChest INSTANCE = new EffectEnderChest();
+
     private static final ITextComponent CONTAINER_NAME = new TranslationTextComponent("container.enderchest");
 
-    public EffectEnderChest() {
+    private EffectEnderChest() {
         super(GlyphLib.EffectEnderChestID, "Access Ender Inventory");
     }
 
     @Override
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         if(shooter instanceof PlayerEntity && !(shooter instanceof FakePlayer)){
-            EnderChestInventory chestInventory = ((PlayerEntity)shooter).getInventoryEnderChest();
-            ((PlayerEntity) shooter).openContainer(new SimpleNamedContainerProvider((p_226928_1_, p_226928_2_, p_226928_3_) -> {
-                return ChestContainer.createGeneric9X3(p_226928_1_, p_226928_2_, chestInventory);
+            EnderChestInventory chestInventory = ((PlayerEntity)shooter).getEnderChestInventory();
+            ((PlayerEntity) shooter).openMenu(new SimpleNamedContainerProvider((p_226928_1_, p_226928_2_, p_226928_3_) -> {
+                return ChestContainer.threeRows(p_226928_1_, p_226928_2_, chestInventory);
             }, CONTAINER_NAME));
         }
 
+    }
+
+    @Nonnull
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf();
     }
 
     @Override

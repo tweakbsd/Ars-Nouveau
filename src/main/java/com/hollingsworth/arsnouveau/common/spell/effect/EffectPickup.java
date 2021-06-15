@@ -18,29 +18,33 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectPickup extends AbstractEffect {
-    public EffectPickup() {
+    public static EffectPickup INSTANCE = new EffectPickup();
+
+    private EffectPickup() {
         super(GlyphLib.EffectPickupID, "Item Pickup");
     }
 
     @Override
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
-        BlockPos pos = new BlockPos(rayTraceResult.getHitVec());
-        int expansion = 5 + getBuffCount(augments, AugmentAOE.class);
+        BlockPos pos = new BlockPos(rayTraceResult.getLocation());
+        int expansion = 2 + getBuffCount(augments, AugmentAOE.class);
 
-        List<ItemEntity> entityList = world.getEntitiesWithinAABB(ItemEntity.class, new AxisAlignedBB(pos.east(expansion).north(expansion).up(expansion),
-                pos.west(expansion).south(expansion).down(expansion)));
+        List<ItemEntity> entityList = world.getEntitiesOfClass(ItemEntity.class, new AxisAlignedBB(pos.east(expansion).north(expansion).above(expansion),
+                pos.west(expansion).south(expansion).below(expansion)));
         for(ItemEntity i : entityList){
 
             if(isRealPlayer(shooter) && spellContext.castingTile == null){
                 ItemStack stack = i.getItem();
                 PlayerEntity player = (PlayerEntity) shooter;
                 VoidJar.tryVoiding(player, stack);
-                if(!player.addItemStackToInventory(stack)){
-                    i.setPosition(player.getPosX(), player.getPosY(), player.getPosZ());
+                if(!player.addItem(stack)){
+                    i.setPos(player.getX(), player.getY(), player.getZ());
                 }
 //                i.onCollideWithPlayer((PlayerEntity) shooter);
             }else if(shooter instanceof IPickupResponder){
@@ -54,6 +58,12 @@ public class EffectPickup extends AbstractEffect {
     @Override
     public boolean wouldSucceed(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments) {
         return true;
+    }
+
+    @Nonnull
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentAOE.INSTANCE);
     }
 
     @Override

@@ -8,8 +8,9 @@ import net.minecraft.item.Items;
 import javax.annotation.Nullable;
 
 public class AugmentExtract extends AbstractAugment {
+    public static AugmentExtract INSTANCE = new AugmentExtract();
 
-    public AugmentExtract() {
+    private AugmentExtract() {
         super(GlyphLib.AugmentExtractID, "Extract");
     }
 

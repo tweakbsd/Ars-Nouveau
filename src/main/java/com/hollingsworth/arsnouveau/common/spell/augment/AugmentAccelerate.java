@@ -8,8 +8,9 @@ import net.minecraft.item.Items;
 import javax.annotation.Nullable;
 
 public class AugmentAccelerate extends AbstractAugment {
+    public static AugmentAccelerate INSTANCE = new AugmentAccelerate();
 
-    public AugmentAccelerate() {
+    private AugmentAccelerate() {
         super(GlyphLib.AugmentAccelerateID, "Accelerate");
     }
 

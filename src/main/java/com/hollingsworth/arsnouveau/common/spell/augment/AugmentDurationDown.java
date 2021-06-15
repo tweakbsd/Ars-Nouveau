@@ -6,8 +6,9 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import net.minecraft.item.Item;
 
 public class AugmentDurationDown extends AbstractAugment {
+    public static AugmentDurationDown INSTANCE = new AugmentDurationDown();
 
-    public AugmentDurationDown() {
+    private AugmentDurationDown() {
         super(GlyphLib.AugmentDurationDown, "Duration Down");
     }
 
@@ -19,7 +20,7 @@ public class AugmentDurationDown extends AbstractAugment {
 
     @Override
     public Item getCraftingReagent() {
-        return ArsNouveauAPI.getInstance().getGlyphItem(new AugmentExtendTime());
+        return ArsNouveauAPI.getInstance().getGlyphItem(AugmentExtendTime.INSTANCE);
     }
 
     @Override

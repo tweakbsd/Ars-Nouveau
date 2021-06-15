@@ -6,6 +6,8 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.common.block.RedstoneAir;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDampen;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import com.hollingsworth.arsnouveau.setup.BlockRegistry;
 import net.minecraft.block.BlockState;
@@ -17,45 +19,65 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectRedstone extends AbstractEffect {
-    public EffectRedstone() {
+    public static EffectRedstone INSTANCE = new EffectRedstone();
+
+    private EffectRedstone() {
         super(GlyphLib.EffectRedstoneID, "Redstone Signal");
     }
 
     @Override
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         if(rayTraceResult instanceof BlockRayTraceResult){
-            BlockState state = BlockRegistry.REDSTONE_AIR.getDefaultState();
+            BlockState state = BlockRegistry.REDSTONE_AIR.defaultBlockState();
             int signalModifier = getAmplificationBonus(augments) + 10;
             if(signalModifier < 1)
                 signalModifier = 1;
             if(signalModifier > 15)
                 signalModifier = 15;
-            state = state.with(RedstoneAir.POWER, signalModifier);
-            BlockPos pos = ((BlockRayTraceResult) rayTraceResult).getPos().offset(((BlockRayTraceResult) rayTraceResult).getFace());
+            state = state.setValue(RedstoneAir.POWER, signalModifier);
+            BlockPos pos = ((BlockRayTraceResult) rayTraceResult).getBlockPos().relative(((BlockRayTraceResult) rayTraceResult).getDirection());
             if(!(world.getBlockState(pos).getMaterial() == Material.AIR && world.getBlockState(pos).getBlock() != BlockRegistry.REDSTONE_AIR)){
                 return;
             }
             int timeBonus = getBuffCount(augments, AugmentExtendTime.class);
-            world.setBlockState(pos, state);
-            world.getPendingBlockTicks().scheduleTick(pos, state.getBlock(), 5 + timeBonus * 10);
+            world.setBlockAndUpdate(pos, state);
+            world.getBlockTicks().scheduleTick(pos, state.getBlock(), GENERIC_INT.get() + timeBonus * BONUS_TIME.get());
 
-            BlockPos hitPos = pos.offset(((BlockRayTraceResult) rayTraceResult).getFace().getOpposite());
+            BlockPos hitPos = pos.relative(((BlockRayTraceResult) rayTraceResult).getDirection().getOpposite());
 
             BlockUtil.safelyUpdateState(world, pos);
-            world.notifyNeighborsOfStateChange(pos, state.getBlock());
-            world.notifyNeighborsOfStateChange(hitPos, state.getBlock());
+            world.updateNeighborsAt(pos, state.getBlock());
+            world.updateNeighborsAt(hitPos, state.getBlock());
         }
+    }
+
+
+    public ForgeConfigSpec.IntValue BONUS_TIME;
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addGenericInt(builder, 5, "Base time in ticks", "base_duration");
+        BONUS_TIME = builder.comment("Extend time bonus, in ticks").defineInRange("extend_time", 10, 0, Integer.MAX_VALUE);
     }
 
     @Nullable
     @Override
     public Item getCraftingReagent() {
         return Items.REDSTONE_BLOCK;
+    }
+
+    @Nonnull
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE, AugmentExtendTime.INSTANCE);
     }
 
     @Override

@@ -8,7 +8,9 @@ import net.minecraft.item.Items;
 import javax.annotation.Nullable;
 
 public class AugmentFortune extends AbstractAugment {
-    public AugmentFortune() {
+    public static AugmentFortune INSTANCE = new AugmentFortune();
+
+    private AugmentFortune() {
         super(GlyphLib.AugmentFortuneID, "Fortune");
     }
 

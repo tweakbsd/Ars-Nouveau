@@ -8,7 +8,10 @@ import net.minecraft.item.Items;
 import javax.annotation.Nullable;
 
 public class AugmentAmplify extends AbstractAugment {
-    public AugmentAmplify() {
+    public static AugmentAmplify INSTANCE = new AugmentAmplify();
+
+
+    private AugmentAmplify() {
         super(GlyphLib.AugmentAmplifyID, "Amplify");
     }
 

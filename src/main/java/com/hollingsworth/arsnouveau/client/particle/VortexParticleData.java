@@ -15,12 +15,12 @@ public class VortexParticleData implements IParticleFactory<ColorParticleTypeDat
     }
 
     @Override
-    public Particle makeParticle(ColorParticleTypeData data, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+    public Particle createParticle(ColorParticleTypeData data, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         return new ParticleVortex(worldIn, x,y,z,xSpeed, ySpeed, zSpeed, data.color.getRed(), data.color.getGreen(), data.color.getBlue(), 1.0f, .25f, 36, this.spriteSet);
     }
 
     public static IParticleData createData(ParticleColor color) {
-        return new ColorParticleTypeData(ModParticles.VORTEX_TYPE, color);
+        return new ColorParticleTypeData(ModParticles.VORTEX_TYPE, color, false);
     }
 
 }

@@ -17,12 +17,16 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class EffectDispel extends AbstractEffect {
-    public EffectDispel() {
+    public static EffectDispel INSTANCE = new EffectDispel();
+
+    private EffectDispel() {
         super(GlyphLib.EffectDispelID, "Dispel");
     }
 
@@ -31,11 +35,11 @@ public class EffectDispel extends AbstractEffect {
         if(rayTraceResult instanceof EntityRayTraceResult){
             if(((EntityRayTraceResult) rayTraceResult).getEntity() instanceof LivingEntity){
                 LivingEntity entity = (LivingEntity) ((EntityRayTraceResult) rayTraceResult).getEntity();
-                Collection<EffectInstance> effects = entity.getActivePotionEffects();
+                Collection<EffectInstance> effects = entity.getActiveEffects();
                 EffectInstance[] array = effects.toArray(new EffectInstance[effects.size()]);
                 for(EffectInstance e : array){
                     if(e.isCurativeItem(new ItemStack(Items.MILK_BUCKET)))
-                        entity.removePotionEffect(e.getPotion());
+                        entity.removeEffect(e.getEffect());
                 }
                 if(entity instanceof IDispellable && entity.isAlive() && entity.getHealth() > 0 && !entity.removed){
                     ((IDispellable) entity).onDispel(shooter);
@@ -44,14 +48,14 @@ public class EffectDispel extends AbstractEffect {
             }
             return;
         }
-        if(rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getPos()) instanceof IDispellable){
-            ((IDispellable) world.getBlockState(((BlockRayTraceResult) rayTraceResult).getPos())).onDispel(shooter);
+        if(rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getBlockPos()) instanceof IDispellable){
+            ((IDispellable) world.getBlockState(((BlockRayTraceResult) rayTraceResult).getBlockPos())).onDispel(shooter);
         }
     }
 
     @Override
     public boolean wouldSucceed(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments) {
-        return rayTraceResult instanceof EntityRayTraceResult || (rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getPos()).getBlock() instanceof IDispellable);
+        return rayTraceResult instanceof EntityRayTraceResult || (rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getBlockPos()).getBlock() instanceof IDispellable);
     }
 
     @Override
@@ -63,6 +67,13 @@ public class EffectDispel extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.MILK_BUCKET;
+    }
+
+    @Nonnull
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        // Augments were sent with the DispelEvent, but there's no use of its augments field.
+        return augmentSetOf();
     }
 
     @Override

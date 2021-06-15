@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
+import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
@@ -20,39 +21,53 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeConfigSpec;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectIgnite  extends AbstractEffect {
+    public static EffectIgnite INSTANCE = new EffectIgnite();
 
-    public EffectIgnite() {
+    private EffectIgnite() {
         super(GlyphLib.EffectIgniteID, "Ignite");
     }
 
     @Override
-    public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
-        if(rayTraceResult instanceof EntityRayTraceResult){
-            int duration = 3 + 2*getBuffCount(augments, AugmentExtendTime.class);
-            ((EntityRayTraceResult) rayTraceResult).getEntity().setFire(duration);
-        }else if(rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getPos().up()).getMaterial() == Material.AIR){
-            Direction face = ((BlockRayTraceResult) rayTraceResult).getFace();
-            for(BlockPos pos : SpellUtil.calcAOEBlocks( shooter, ((BlockRayTraceResult) rayTraceResult).getPos(), (BlockRayTraceResult)rayTraceResult, getBuffCount(augments, AugmentAOE.class), getBuffCount(augments, AugmentPierce.class))) {
+    public void onResolveEntity(EntityRayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
+        super.onResolveEntity(rayTraceResult, world, shooter, augments, spellContext);
+        int duration = POTION_TIME.get() + EXTEND_TIME.get()*getBuffCount(augments, AugmentExtendTime.class);
+        rayTraceResult.getEntity().setSecondsOnFire(duration);
+    }
 
-                BlockPos blockpos1 = pos.offset(face);
-                if (AbstractFireBlock.canLightBlock(world, blockpos1, face)) {
-                    BlockState blockstate1 = AbstractFireBlock.getFireForPlacement(world, blockpos1);
-                    world.setBlockState(blockpos1, blockstate1, 11);
+    @Override
+    public void onResolveBlock(BlockRayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
+        super.onResolveBlock(rayTraceResult, world, shooter, augments, spellContext);
+        if(world.getBlockState((rayTraceResult).getBlockPos().above()).getMaterial() == Material.AIR) {
+            Direction face = (rayTraceResult).getDirection();
+            for (BlockPos pos : SpellUtil.calcAOEBlocks(shooter, (rayTraceResult).getBlockPos(), rayTraceResult, getBuffCount(augments, AugmentAOE.class), getBuffCount(augments, AugmentPierce.class))) {
+                BlockPos blockpos1 = pos.relative(face);
+                if (AbstractFireBlock.canBePlacedAt(world, blockpos1, face) && BlockUtil.destroyRespectsClaim(getPlayer(shooter, (ServerWorld) world), world, blockpos1)) {
+                    BlockState blockstate1 = AbstractFireBlock.getState(world, blockpos1);
+                    world.setBlock(blockpos1, blockstate1, 11);
                 }
-//                if(world.getBlockState(pos.up()).getMaterial() == Material.AIR)
-//                    world.setBlockState(pos.up(), Blocks.FIRE.getDefaultState());
             }
         }
     }
 
     @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addExtendTimeConfig(builder, 2);
+        addPotionConfig(builder, 3);
+    }
+
+    @Override
     public boolean wouldSucceed(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments) {
-        return livingEntityHitSuccess(rayTraceResult) || rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getPos().up()).getMaterial() == Material.AIR;
+        return livingEntityHitSuccess(rayTraceResult) || rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getBlockPos().above()).getMaterial() == Material.AIR;
     }
 
     @Override
@@ -69,6 +84,12 @@ public class EffectIgnite  extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.FLINT_AND_STEEL;
+    }
+
+    @Nonnull
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentExtendTime.INSTANCE , AugmentAOE.INSTANCE,AugmentPierce.INSTANCE);
     }
 
     @Override

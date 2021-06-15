@@ -4,7 +4,7 @@ import com.hollingsworth.arsnouveau.GlyphLib;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
+import com.hollingsworth.arsnouveau.common.spell.augment.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -15,27 +15,44 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeConfigSpec;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectHarm extends AbstractEffect {
+    public static EffectHarm INSTANCE = new EffectHarm();
 
-    public EffectHarm() {super(GlyphLib.EffectHarmID, "Harm" ); }
+    private EffectHarm() {super(GlyphLib.EffectHarmID, "Harm" ); }
 
     @Override
-    public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
-        if(rayTraceResult instanceof EntityRayTraceResult){
-            float damage = 5.0f +2.0f * getAmplificationBonus(augments);
-            Entity entity = ((EntityRayTraceResult) rayTraceResult).getEntity();
-            int time = getBuffCount(augments, AugmentExtendTime.class);
-            if(time > 0){
-                if(entity instanceof LivingEntity)
-                    applyPotion((LivingEntity) entity, Effects.POISON, augments, 5, 5);
-            }else{
-                dealDamage(world, shooter, damage, augments, entity, DamageSource.causePlayerDamage(getPlayer(shooter, (ServerWorld) world)));
-            }
+    public void onResolveEntity(EntityRayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
+        super.onResolveEntity(rayTraceResult, world, shooter, augments, spellContext);
+        double damage = DAMAGE.get() + AMP_VALUE.get() * getAmplificationBonus(augments);
+        Entity entity = ((EntityRayTraceResult) rayTraceResult).getEntity();
+        int time = getBuffCount(augments, AugmentExtendTime.class);
+        if(time > 0){
+            if(entity instanceof LivingEntity)
+                applyConfigPotion((LivingEntity) entity, Effects.POISON, augments);
+        }else{
+            dealDamage(world, shooter, (float) damage, augments, entity, DamageSource.playerAttack(getPlayer(shooter, (ServerWorld) world)));
         }
+    }
+
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addDamageConfig(builder, 5.0);
+        addAmpConfig(builder, 2.0);
+        addPotionConfig(builder, 5);
+        addExtendTimeConfig(builder, 5);
+    }
+
+    @Override
+    public boolean defaultedStarterGlyph() {
+        return true;
     }
 
     @Override
@@ -57,6 +74,16 @@ public class EffectHarm extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.IRON_SWORD;
+    }
+
+    @Nonnull
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(
+                AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE,
+                AugmentExtendTime.INSTANCE, AugmentDurationDown.INSTANCE,
+                AugmentFortune.INSTANCE
+        );
     }
 
     @Override

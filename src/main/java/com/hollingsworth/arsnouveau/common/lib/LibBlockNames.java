@@ -76,4 +76,14 @@ public class LibBlockNames {
 
     public final static String POTION_JAR_BLOCK = "potion_jar";
     public final static String POTION_MELDER_BLOCK = "potion_melder";
+
+    public final static String AB_SMOOTH_BASKET = "sas_basket";
+    public final static String AB_SMOOTH_CLOVER = "sas_clover";
+    public final static String AB_SMOOTH_HERRING = "sas_herring";
+    public final static String AB_SMOOTH_MOSAIC= "sas_mosaic";
+    public final static String AB_SMOOTH_ALTERNATING = "sas_alternating";
+    public final static String AB_SMOOTH_ASHLAR = "sas_ashlar";
+    public final static String SCONCE = "sconce";
+
+    public static final String DRYGMY_STONE = "drygmy_stone";
 }

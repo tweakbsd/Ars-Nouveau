@@ -8,7 +8,9 @@ import net.minecraft.item.Items;
 import javax.annotation.Nullable;
 
 public class AugmentExtendTime extends AbstractAugment {
-    public AugmentExtendTime() {
+    public static AugmentExtendTime INSTANCE = new AugmentExtendTime();
+
+    private AugmentExtendTime() {
         super(GlyphLib.AugmentExtendTimeID, "Extend Time");
     }
 

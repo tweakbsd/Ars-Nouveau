@@ -6,13 +6,15 @@ import com.google.gson.JsonObject;
 import com.hollingsworth.arsnouveau.ArsNouveau;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDampen;
-import com.hollingsworth.arsnouveau.setup.Config;
+import com.hollingsworth.arsnouveau.common.util.SpellPartConfigUtil;
 import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.item.Item;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.common.ForgeConfigSpec;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.*;
 
 public abstract class AbstractSpellPart implements ISpellTier, Comparable<AbstractSpellPart> {
 
@@ -30,7 +32,7 @@ public abstract class AbstractSpellPart implements ISpellTier, Comparable<Abstra
         this.tag = tag;
         this.name = name;
     }
-
+    // Final mana cost
     public int getAdjustedManaCost(List<AbstractAugment> augmentTypes){
         int cost = getConfigCost();
         for(AbstractAugment a: augmentTypes){
@@ -43,7 +45,7 @@ public abstract class AbstractSpellPart implements ISpellTier, Comparable<Abstra
     }
 
     public int getConfigCost(){
-        return Config.getSpellCost(this.tag);
+        return COST == null ? getManaCost() : COST.get();
     }
 
     @Nullable
@@ -72,6 +74,20 @@ public abstract class AbstractSpellPart implements ISpellTier, Comparable<Abstra
 
     public int getAmplificationBonus(List<AbstractAugment> augmentTypes){
         return getBuffCount(augmentTypes, AugmentAmplify.class) - getBuffCount(augmentTypes, AugmentDampen.class);
+    }
+
+    /**
+     * Returns the set of augments that this spell part can be enhanced by.
+     *
+     * @see AbstractSpellPart#augmentSetOf(AbstractAugment...) for easy syntax to make the Set.
+     */
+    public abstract @Nonnull Set<AbstractAugment> getCompatibleAugments();
+
+    /**
+     * Syntax support to easily make a set for {@link AbstractSpellPart#getCompatibleAugments()}
+     */
+    protected Set<AbstractAugment> augmentSetOf(AbstractAugment... augments) {
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(augments)));
     }
 
     @Override
@@ -121,6 +137,46 @@ public abstract class AbstractSpellPart implements ISpellTier, Comparable<Abstra
         jsonobject.add("pages", jsonArray);
         return jsonobject;
     }
+    public ForgeConfigSpec CONFIG;
+    public ForgeConfigSpec.IntValue COST;
+    public ForgeConfigSpec.BooleanValue ENABLED;
+    public ForgeConfigSpec.BooleanValue STARTER_SPELL;
+    public ForgeConfigSpec.IntValue PER_SPELL_LIMIT;
+
+    public void buildConfig(ForgeConfigSpec.Builder builder){
+        builder.comment("General settings").push("general");
+        ENABLED = builder.comment("Is Enabled?").define("enabled", true);
+        COST = builder.comment("Cost").defineInRange("cost", getManaCost(), Integer.MIN_VALUE, Integer.MAX_VALUE);
+        STARTER_SPELL = builder.comment("Is Starter Glyph?").define("starter", defaultedStarterGlyph());
+        PER_SPELL_LIMIT = builder.comment("The maximum number of times this glyph may appear in a single spell").defineInRange("per_spell_limit", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
+    }
+
+    /** Returns the number of times that this glyph may be modified by the given augment. */
+    public int getAugmentLimit(String augmentTag) {
+        if (augmentLimits == null) {
+            return Integer.MAX_VALUE;
+        } else {
+            return augmentLimits.getAugmentLimit(augmentTag);
+        }
+    }
+
+    // Augment limits only apply to cast forms and effects, but not augments.
+    private SpellPartConfigUtil.AugmentLimits augmentLimits;
+
+    /** Registers the glyph_limits configuration entry for augmentation limits. */
+    protected void buildAugmentLimitsConfig(ForgeConfigSpec.Builder builder, Map<String, Integer> defaults) {
+        this.augmentLimits = SpellPartConfigUtil.buildAugmentLimitsConfig(builder, defaults);
+    }
+
+    /** Override this method to provide defaults for the augmentation limits configuration. */
+    protected Map<String, Integer> getDefaultAugmentLimits() {
+        return new HashMap<>();
+    }
+
+    // Default value for the starter spell config
+    public boolean defaultedStarterGlyph(){
+        return false;
+    }
 
     public String getItemID(){
         return "glyph_" + this.getTag();
@@ -130,7 +186,11 @@ public abstract class AbstractSpellPart implements ISpellTier, Comparable<Abstra
         return "";
     }
 
+    public String getLocalizationKey() {
+        return "ars_nouveau.glyph_name." + tag;
+    }
+
     public String getLocaleName(){
-        return new TranslationTextComponent("ars_nouveau.glyph_name." + tag).getString();
+        return new TranslationTextComponent(getLocalizationKey()).getString();
     }
 }

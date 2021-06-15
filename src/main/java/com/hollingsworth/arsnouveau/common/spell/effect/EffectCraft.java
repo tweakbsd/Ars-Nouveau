@@ -17,11 +17,16 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectCraft extends AbstractEffect {
-    public EffectCraft() {
+
+    public static EffectCraft INSTANCE = new EffectCraft();
+
+    private EffectCraft() {
         super(GlyphLib.EffectCraftID, "Craft");
     }
 
@@ -31,8 +36,8 @@ public class EffectCraft extends AbstractEffect {
     public void onResolve(RayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         if(shooter instanceof PlayerEntity && isRealPlayer(shooter)){
             PlayerEntity playerEntity = (PlayerEntity) shooter;
-            playerEntity.openContainer(new SimpleNamedContainerProvider((id, inventory, player) -> {
-                return new CustomWorkbench(id, inventory, IWorldPosCallable.of(player.getEntityWorld(), player.getPosition()));
+            playerEntity.openMenu(new SimpleNamedContainerProvider((id, inventory, player) -> {
+                return new CustomWorkbench(id, inventory, IWorldPosCallable.create(player.getCommandSenderWorld(), player.blockPosition()));
             }, CONTAINER_NAME));
         }
     }
@@ -53,7 +58,7 @@ public class EffectCraft extends AbstractEffect {
         }
 
         @Override
-        public boolean canInteractWith(PlayerEntity playerIn) {
+        public boolean stillValid(PlayerEntity playerIn) {
             return true;
         }
     }
@@ -61,6 +66,12 @@ public class EffectCraft extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.CRAFTING_TABLE;
+    }
+
+    @Nonnull
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf();
     }
 
     @Override

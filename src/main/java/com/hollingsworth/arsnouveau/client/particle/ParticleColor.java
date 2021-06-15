@@ -1,5 +1,8 @@
 package com.hollingsworth.arsnouveau.client.particle;
 
+import javax.annotation.Nonnull;
+import java.util.Random;
+
 /**
  * Modified class of ElementType: https://github.com/Sirttas/ElementalCraft/blob/b91ca42b3d139904d9754d882a595406bad1bd18/src/main/java/sirttas/elementalcraft/ElementType.java
  */
@@ -15,6 +18,10 @@ public class ParticleColor {
         this.g = g / 255F;
         this.b = b / 255F;
         this.color = (r << 16) | (g << 8) | b;
+    }
+
+    public static ParticleColor makeRandomColor(int r, int g, int b, Random random){
+        return new ParticleColor(random.nextInt(r), random.nextInt(g), random.nextInt(b));
     }
 
     public ParticleColor(float r, float g, float b){
@@ -47,6 +54,10 @@ public class ParticleColor {
         return "" + this.r + "," + this.g +","+this.b;
     }
 
+    public IntWrapper toWrapper(){
+        return new IntWrapper(this);
+    }
+
     public static ParticleColor deserialize(String string){
         String[] arr = string.split(",");
         return new ParticleColor(Integer.parseInt(arr[0].trim()), Integer.parseInt(arr[1].trim()), Integer.parseInt(arr[2].trim()));
@@ -61,6 +72,12 @@ public class ParticleColor {
             this.r = r;
             this.g = g;
             this.b = b;
+        }
+
+        public IntWrapper(ParticleColor color){
+            this.r = (int) (color.getRed() * 255.0);
+            this.g = (int) (color.getGreen() * 255.0);
+            this.b = (int) (color.getBlue() * 255.0);
         }
 
         public ParticleColor toParticleColor(){
@@ -79,9 +96,16 @@ public class ParticleColor {
             }
         }
 
-        public static ParticleColor.IntWrapper deserialize(String string){
-            String[] arr = string.split(",");
-            return new ParticleColor.IntWrapper(Integer.parseInt(arr[0].trim()), Integer.parseInt(arr[1].trim()), Integer.parseInt(arr[2].trim()));
+        public static @Nonnull ParticleColor.IntWrapper deserialize(String string){
+            ParticleColor.IntWrapper color = ParticleUtil.defaultParticleColorWrapper();
+            try{
+                String[] arr = string.split(",");
+                color = new ParticleColor.IntWrapper(Integer.parseInt(arr[0].trim()), Integer.parseInt(arr[1].trim()), Integer.parseInt(arr[2].trim()));
+                return color;
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return color;
         }
     }
 }

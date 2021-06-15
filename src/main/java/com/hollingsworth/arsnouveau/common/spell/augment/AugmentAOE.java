@@ -8,7 +8,9 @@ import net.minecraft.item.Items;
 import javax.annotation.Nullable;
 
 public class AugmentAOE extends AbstractAugment {
-    public AugmentAOE() {
+    public static AugmentAOE INSTANCE = new AugmentAOE();
+
+    private AugmentAOE() {
         super(GlyphLib.AugmentAOEID, "AOE");
     }
 

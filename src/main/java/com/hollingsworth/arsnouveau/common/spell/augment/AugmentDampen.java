@@ -8,8 +8,9 @@ import net.minecraft.item.Items;
 import javax.annotation.Nullable;
 
 public class AugmentDampen extends AbstractAugment {
+    public static AugmentDampen INSTANCE = new AugmentDampen();
 
-    public AugmentDampen() {
+    private AugmentDampen() {
         super(GlyphLib.AugmentDampenID, "Dampen");
     }
 

@@ -6,6 +6,7 @@ import com.hollingsworth.arsnouveau.api.spell.ISpellTier;
 import com.hollingsworth.arsnouveau.common.armor.ApprenticeArmor;
 import com.hollingsworth.arsnouveau.common.armor.MasterArmor;
 import com.hollingsworth.arsnouveau.common.armor.NoviceArmor;
+import com.hollingsworth.arsnouveau.common.entity.ModEntities;
 import com.hollingsworth.arsnouveau.common.items.*;
 import com.hollingsworth.arsnouveau.common.items.curios.*;
 import com.hollingsworth.arsnouveau.common.lib.LibItemNames;
@@ -16,6 +17,8 @@ import com.hollingsworth.arsnouveau.common.spell.augment.AugmentSplit;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Food;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemTier;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.RegistryEvent;
@@ -99,7 +102,6 @@ public class ItemsRegistry {
     @ObjectHolder(LibItemNames.VOID_JAR)public static VoidJar VOID_JAR;
     @ObjectHolder(LibItemNames.WIXIE_CHARM)public static WixieCharm WIXIE_CHARM;
     @ObjectHolder(LibItemNames.WIXIE_SHARD)public static ModItem WIXIE_SHARD;
-    @ObjectHolder(LibItemNames.RITUAL_BOOK)public static RitualBook RITUAL_BOOK;
     @ObjectHolder(LibItemNames.SPELL_BOW)public static SpellBow SPELL_BOW;
 
     @ObjectHolder(LibItemNames.AMPLIFY_ARROW)public static SpellArrow AMPLIFY_ARROW;
@@ -114,8 +116,15 @@ public class ItemsRegistry {
     @ObjectHolder(LibItemNames.POTION_FLASK)public static PotionFlask POTION_FLASK;
     @ObjectHolder(LibItemNames.POTION_FLASK_AMPLIFY)public static PotionFlask POTION_FLASK_AMPLIFY;
     @ObjectHolder(LibItemNames.POTION_FLASK_EXTEND_TIME)public static PotionFlask POTION_FLASK_EXTEND_TIME;
+    @ObjectHolder(LibItemNames.EXP_GEM)public static ExperienceGem EXPERIENCE_GEM;
+    @ObjectHolder(LibItemNames.GREATER_EXP_GEM)public static ExperienceGem GREATER_EXPERIENCE_GEM;
 
-    public static Food MANA_BERRY_FOOD = (new Food.Builder()).hunger(2).saturation(0.1F).effect(() -> new EffectInstance(ModPotions.MANA_REGEN_EFFECT, 100), 1.0f).setAlwaysEdible().build();
+    @ObjectHolder(LibItemNames.ENCHANTERS_SWORD)public static EnchantersSword ENCHANTERS_SWORD;
+    @ObjectHolder(LibItemNames.ENCHANTERS_SHIELD)public static EnchantersShield ENCHANTERS_SHIELD;
+    @ObjectHolder(LibItemNames.CASTER_TOME)public static CasterTome CASTER_TOME;
+
+
+    public static Food MANA_BERRY_FOOD = (new Food.Builder()).nutrition(2).saturationMod(0.1F).effect(() -> new EffectInstance(ModPotions.MANA_REGEN_EFFECT, 100), 1.0f).alwaysEat().build();
 
     @Mod.EventBusSubscriber(modid = ArsNouveau.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class RegistrationHandler{
@@ -130,19 +139,19 @@ public class ItemsRegistry {
                     new DominionWand(),
                     new RunicChalk(),
                     new ModItem(LibItemNames.BLANK_GLYPH),
-                    new ModItem(LibItemNames.DULL_TRINKET),
+                    new ModItem(LibItemNames.DULL_TRINKET).withTooltip(new TranslationTextComponent("ars_nouveau.tooltip.dull")),
                     new ModItem(LibItemNames.MARVELOUS_CLAY),
                     new ModItem(LibItemNames.MAGIC_CLAY),
                     new ModItem(LibItemNames.MYTHICAL_CLAY),
                     new ModItem(LibItemNames.BLAZE_FIBER),
                     new ModItem(LibItemNames.END_FIBER),
-                    new CompostableItem(LibItemNames.MANA_BLOOM, 0.65F),
+                    new CompostableItem(LibItemNames.MANA_BLOOM, 0.65F).withTooltip(new TranslationTextComponent("ars_nouveau.tooltip.mana_bloom")),
                     new ModItem(LibItemNames.MANA_FIBER),
-                    new ModItem(LibItemNames.MUNDANE_BELT),
+                    new ModItem(LibItemNames.MUNDANE_BELT).withTooltip(new TranslationTextComponent("ars_nouveau.tooltip.dull")),
                     new ModItem(LibItemNames.ARCANE_BRICK).withTooltip(new TranslationTextComponent("tooltip.arcane_brick")),
-                    new ModItem(LibItemNames.RING_OF_POTENTIAL),
+                    new ModItem(LibItemNames.RING_OF_POTENTIAL).withTooltip(new TranslationTextComponent("ars_nouveau.tooltip.dull")),
                     new BeltOfUnstableGifts(LibItemNames.BELT_OF_UNSTABLE_GIFTS),
-                    new ModItem(defaultItemProperties().maxStackSize(1), LibItemNames.BUCKET_OF_MANA),
+                    new ModItem(defaultItemProperties().stacksTo(1), LibItemNames.BUCKET_OF_MANA),
                     new NoviceArmor(EquipmentSlotType.FEET).setRegistryName("novice_boots"),
                     new NoviceArmor(EquipmentSlotType.LEGS).setRegistryName("novice_leggings"),
                     new NoviceArmor(EquipmentSlotType.CHEST).setRegistryName("novice_robes"),
@@ -201,11 +210,10 @@ public class ItemsRegistry {
                     new ModItem(LibItemNames.WIXIE_SHARD).withTooltip(new TranslationTextComponent("tooltip.wixie_shard")),
                     new Wand(),
                     new VoidJar(),
-                    new RitualBook().setRegistryName(LibItemNames.RITUAL_BOOK),
                     new SpellBow().setRegistryName(LibItemNames.SPELL_BOW),
-                    new FormSpellArrow(LibItemNames.PIERCE_ARROW, new AugmentPierce(), 2),
-                    new FormSpellArrow(LibItemNames.SPLIT_ARROW, new AugmentSplit(), 2),
-                    new SpellArrow(LibItemNames.AMPLIFY_ARROW, new AugmentAmplify(), 2),
+                    new FormSpellArrow(LibItemNames.PIERCE_ARROW, AugmentPierce.INSTANCE, 2),
+                    new FormSpellArrow(LibItemNames.SPLIT_ARROW, AugmentSplit.INSTANCE, 2),
+                    new SpellArrow(LibItemNames.AMPLIFY_ARROW, AugmentAmplify.INSTANCE, 2),
                     new ModItem(LibItemNames.WILDEN_HORN).withTooltip(new TranslationTextComponent("tooltip.wilden_horn")),
                     new ModItem(LibItemNames.WILDEN_WING).withTooltip(new TranslationTextComponent("tooltip.wilden_wing")),
                     new ModItem(LibItemNames.WILDEN_SPIKE).withTooltip(new TranslationTextComponent("tooltip.wilden_spike")),
@@ -219,16 +227,35 @@ public class ItemsRegistry {
                     new PotionFlask(LibItemNames.POTION_FLASK_EXTEND_TIME) {
                         @Override
                         public EffectInstance getEffectInstance(EffectInstance effectInstance) {
-                            return new EffectInstance(effectInstance.getPotion(), effectInstance.getDuration() + effectInstance.getDuration()/2, effectInstance.getAmplifier());
+                            return new EffectInstance(effectInstance.getEffect(), effectInstance.getDuration() + effectInstance.getDuration()/2, effectInstance.getAmplifier());
                         }
                     }.withTooltip(new TranslationTextComponent("tooltip.potion_flask_extend_time")),
                     new PotionFlask(LibItemNames.POTION_FLASK_AMPLIFY) {
                         @Override
                         public EffectInstance getEffectInstance(EffectInstance effectInstance) {
-                            return new EffectInstance(effectInstance.getPotion(), effectInstance.getDuration()/2, effectInstance.getAmplifier() + 1);
+                            return new EffectInstance(effectInstance.getEffect(), effectInstance.getDuration()/2, effectInstance.getAmplifier() + 1);
                         }
-                    }.withTooltip(new TranslationTextComponent("tooltip.potion_flask_amplify"))
-
+                    }.withTooltip(new TranslationTextComponent("tooltip.potion_flask_amplify")),
+                    new ExperienceGem(defaultItemProperties(), LibItemNames.EXP_GEM) {
+                        @Override
+                        public int getValue() {
+                            return 3;
+                        }
+                    }.withTooltip(new TranslationTextComponent("ars_nouveau.tooltip.exp_gem")),
+                    new ExperienceGem(defaultItemProperties(), LibItemNames.GREATER_EXP_GEM) {
+                        @Override
+                        public int getValue() {
+                            return 12;
+                        }
+                    }.withTooltip(new TranslationTextComponent("ars_nouveau.tooltip.exp_gem")),
+                    new EnchantersShield(),
+                    new EnchantersSword(ItemTier.NETHERITE, 3, -2.4F).setRegistryName(LibItemNames.ENCHANTERS_SWORD),
+                    new SpawnEggItem(ModEntities.ENTITY_CARBUNCLE_TYPE, 0xFFB233,0xFFE633,defaultItemProperties()).setRegistryName(LibItemNames.CARBUNCLE_SE),
+                    new SpawnEggItem(ModEntities.ENTITY_SYLPH_TYPE, 0x77FF33,0xFFFB00,defaultItemProperties()).setRegistryName(LibItemNames.SYLPH_SE),
+                    new SpawnEggItem(ModEntities.WILDEN_HUNTER, 0xFDFDFD,0xCAA97F,defaultItemProperties()).setRegistryName(LibItemNames.WILDEN_HUNTER_SE),
+                    new SpawnEggItem(ModEntities.WILDEN_GUARDIAN, 0xFFFFFF,0xFF9E00,defaultItemProperties()).setRegistryName(LibItemNames.WILDEN_GUARDIAN_SE),
+                    new SpawnEggItem(ModEntities.WILDEN_STALKER, 0x9B650C,0xEF1818,defaultItemProperties()).setRegistryName(LibItemNames.WILDEN_STALKER_SE),
+                    new CasterTome(LibItemNames.CASTER_TOME)
             };
 
             final IForgeRegistry<Item> registry = event.getRegistry();
@@ -236,6 +263,13 @@ public class ItemsRegistry {
                 registry.register(glyph);
                 ITEMS.add(glyph);
             }
+
+            for(RitualTablet ritualParchment : ArsNouveauAPI.getInstance().getRitualItemMap().values()){
+                registry.register(ritualParchment);
+                ITEMS.add(ritualParchment);
+            }
+
+
             for (final Item item : items) {
                 registry.register(item);
                 ITEMS.add(item);
@@ -245,7 +279,7 @@ public class ItemsRegistry {
     }
 
     public static Item.Properties defaultItemProperties() {
-        return new Item.Properties().group(ArsNouveau.itemGroup);
+        return new Item.Properties().tab(ArsNouveau.itemGroup);
     }
 }
 
