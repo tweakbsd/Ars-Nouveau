@@ -5,8 +5,7 @@ import com.hollingsworth.arsnouveau.api.ArsNouveauAPI;
 import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.api.util.LootUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentPierce;
+import com.hollingsworth.arsnouveau.common.spell.augment.*;
 import com.hollingsworth.arsnouveau.setup.BlockRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -31,11 +30,14 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.hollingsworth.arsnouveau.api.util.BlockUtil.destroyBlockSafelyWithoutSound;
 
 public class EffectExchange extends AbstractEffect {
-    public EffectExchange() {
+    public static EffectExchange INSTANCE = new EffectExchange();
+
+    private EffectExchange() {
         super(GlyphLib.EffectExchangeID, "Exchange");
     }
 
@@ -151,9 +153,7 @@ public class EffectExchange extends AbstractEffect {
         destroyBlockSafelyWithoutSound(world, pos1, false, shooter);
 
         if(placeState != null){
-            //world.setBlock(pos1, placeState, 2);
             item.place(context);
-            stack.shrink(1);
             return true;
         }
         return false;
@@ -163,6 +163,15 @@ public class EffectExchange extends AbstractEffect {
     @Override
     public Tier getTier() {
         return Tier.TWO;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(
+                AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE,
+                AugmentPierce.INSTANCE,
+                AugmentAOE.INSTANCE
+        );
     }
 
     @Override

@@ -12,14 +12,16 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectDelay extends AbstractEffect {
-    public EffectDelay() {
+    public static EffectDelay INSTANCE = new EffectDelay();
+
+    private EffectDelay() {
         super(GlyphLib.EffectDelayID, "Delay");
     }
 
@@ -30,15 +32,27 @@ public class EffectDelay extends AbstractEffect {
         if(spellContext.getCurrentIndex() >= spellContext.spell.recipe.size())
             return;
         EventQueue.getInstance().addEvent(
-                new DelayedSpellEvent(20 + getBuffCount(augments, AugmentExtendTime.class) * 20,
+                new DelayedSpellEvent(GENERIC_INT.get() + EXTEND_TIME.get() * getBuffCount(augments, AugmentExtendTime.class) * 20,
                         spellContext.spell.recipe.subList(spellContext.getCurrentIndex(), spellContext.spell.recipe.size()),
                         rayTraceResult, world, shooter));
 
     }
 
     @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addExtendTimeConfig(builder, 1);
+        addGenericInt(builder, 20, "Base duration in ticks.", "base_duration");
+    }
+
+    @Override
     public int getManaCost() {
-        return 50;
+        return 0;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentExtendTime.INSTANCE);
     }
 
     @Override

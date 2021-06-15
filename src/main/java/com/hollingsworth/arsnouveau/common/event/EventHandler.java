@@ -5,6 +5,7 @@ import com.hollingsworth.arsnouveau.api.event.DispelEvent;
 import com.hollingsworth.arsnouveau.client.ClientInfo;
 import com.hollingsworth.arsnouveau.client.particle.ParticleUtil;
 import com.hollingsworth.arsnouveau.common.block.LavaLily;
+import com.hollingsworth.arsnouveau.common.command.DataDumpCommand;
 import com.hollingsworth.arsnouveau.common.command.ResetCommand;
 import com.hollingsworth.arsnouveau.common.items.VoidJar;
 import com.hollingsworth.arsnouveau.common.potions.ModPotions;
@@ -51,6 +52,15 @@ public class EventHandler {
 
 
     @SubscribeEvent
+    public static void livingHurtEvent(LivingHurtEvent e){
+       if(!e.getEntityLiving().level.isClientSide && e.getEntityLiving() instanceof PlayerEntity && e.getEntityLiving().isBlocking()){
+           if(e.getEntityLiving().isHolding(ItemsRegistry.ENCHANTERS_SHIELD)){
+               e.getEntityLiving().addEffect(new EffectInstance(ModPotions.MANA_REGEN_EFFECT, 200, 1));
+           }
+       }
+    }
+
+    @SubscribeEvent
     public static void livingAttackEvent(LivingAttackEvent e){
         if(e.getSource() == DamageSource.HOT_FLOOR && e.getEntityLiving() != null && !e.getEntity().getCommandSenderWorld().isClientSide){
             World world = e.getEntity().level;
@@ -64,14 +74,11 @@ public class EventHandler {
 
     @SubscribeEvent
     public static void jumpEvent(LivingEvent.LivingJumpEvent e) {
-        if(e.getEntityLiving() == null  || e.getEntityLiving().getEffect(Effects.MOVEMENT_SLOWDOWN) == null)
+        if(e.getEntityLiving() == null  || e.getEntityLiving().getEffect(ModPotions.SNARE_EFFECT) == null)
             return;
-        EffectInstance effectInstance = e.getEntityLiving().getEffect(Effects.MOVEMENT_SLOWDOWN);
-        if(effectInstance.getAmplifier() >= 20){
-            e.getEntityLiving().setDeltaMovement(0,0,0);
-        }
-    }
+        e.getEntityLiving().setDeltaMovement(0,0,0);
 
+    }
 
 
     @SubscribeEvent
@@ -148,6 +155,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void commandRegister(RegisterCommandsEvent event){
         ResetCommand.register(event.getDispatcher());
+        DataDumpCommand.register(event.getDispatcher());
     }
 
     private EventHandler(){}

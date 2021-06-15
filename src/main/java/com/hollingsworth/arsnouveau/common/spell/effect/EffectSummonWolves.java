@@ -13,15 +13,16 @@ import net.minecraft.item.Item;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectSummonWolves extends AbstractEffect {
+    public static EffectSummonWolves INSTANCE = new EffectSummonWolves();
 
-    public EffectSummonWolves() {
+    private EffectSummonWolves() {
         super(GlyphLib.EffectSummonWolvesID, "Summon Wolves");
     }
 
@@ -31,7 +32,7 @@ public class EffectSummonWolves extends AbstractEffect {
         if(!canSummon(shooter))
             return;
         Vector3d hit = rayTraceResult.getLocation();
-        int ticks = 60 * 20 * (1 + getDurationModifier(augments));
+        int ticks = 20 * (GENERIC_INT.get() + EXTEND_TIME.get() * getDurationModifier(augments));
         for(int i = 0; i < 2; i++){
             SummonWolf wolf = new SummonWolf(ModEntities.SUMMON_WOLF, world);
             wolf.ticksLeft = ticks;
@@ -46,10 +47,22 @@ public class EffectSummonWolves extends AbstractEffect {
     }
 
     @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addGenericInt(builder, 60, "Base duration in seconds", "duration");
+        addExtendTimeConfig(builder, 60);
+    }
+
+    @Override
     public int getManaCost() {
         return 100;
     }
 
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        // SummonEvent captures augments, but no uses of that field were found
+        return SUMMON_AUGMENTS;
+    }
 
     @Override
     public String getBookDescription() {

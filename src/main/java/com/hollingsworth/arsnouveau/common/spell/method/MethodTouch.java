@@ -14,15 +14,16 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
-
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class MethodTouch extends AbstractCastMethod {
+    public static MethodTouch INSTANCE = new MethodTouch();
 
-    public MethodTouch() {
+    private MethodTouch() {
         super(GlyphLib.MethodTouchID, "Touch");
     }
 
@@ -61,7 +62,6 @@ public class MethodTouch extends AbstractCastMethod {
 
     @Override
     public boolean wouldCastSuccessfully(@Nullable ItemStack stack, LivingEntity playerEntity, World world, List<AbstractAugment> augments) {
-
         return false;
     }
 
@@ -83,6 +83,11 @@ public class MethodTouch extends AbstractCastMethod {
     }
 
     @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf();
+    }
+
+    @Override
     public String getBookDescription() {
         return "Applies spells at the block or entity that is targeted.";
     }
@@ -91,5 +96,10 @@ public class MethodTouch extends AbstractCastMethod {
     @Override
     public Item getCraftingReagent() {
         return Items.STONE_BUTTON;
+    }
+
+    @Override
+    public boolean defaultedStarterGlyph() {
+        return true;
     }
 }

@@ -9,6 +9,8 @@ import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentPierce;
+import com.hollingsworth.arsnouveau.common.spell.method.MethodTouch;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,9 +29,12 @@ import net.minecraftforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectPlaceBlock extends AbstractEffect {
-    public EffectPlaceBlock() {
+    public static EffectPlaceBlock INSTANCE = new EffectPlaceBlock();
+
+    private EffectPlaceBlock() {
         super(GlyphLib.EffectPlaceBlockID, "Place Block");
     }
 
@@ -45,10 +50,26 @@ public class EffectPlaceBlock extends AbstractEffect {
             BlockPos hitPos = result.isInside() ? pos1 : pos1.relative(result.getDirection());
             if(spellContext.castingTile instanceof IPlaceBlockResponder){
                 ItemStack stack = ((IPlaceBlockResponder) spellContext.castingTile).onPlaceBlock();
-                if(stack == null || !(stack.getItem() instanceof BlockItem))
+                if(stack.isEmpty() || !(stack.getItem() instanceof BlockItem))
                     return;
-                BlockItem item = (BlockItem) stack.getItem();
-                attemptPlace(world, stack, item, result);
+
+               BlockItem item = (BlockItem) stack.getItem();
+                FakePlayer fakePlayer = new ANFakePlayer((ServerWorld) world);
+                fakePlayer.setItemInHand(Hand.MAIN_HAND, stack);
+
+                // Special offset for touch
+                boolean isTouch = spellContext.spell.recipe.get(0) instanceof MethodTouch;
+                BlockState blockTargetted = isTouch ? world.getBlockState(hitPos.relative(result.getDirection().getOpposite())) : world.getBlockState(hitPos.relative(result.getDirection()));
+                if(blockTargetted.getMaterial() != Material.AIR)
+                    continue;
+                // Special offset because we are placing a block against the face we are looking at (in the case of touch)
+                Direction direction = isTouch ? result.getDirection().getOpposite() : result.getDirection();
+                BlockItemUseContext context = BlockItemUseContext.at(new BlockItemUseContext(new ItemUseContext(fakePlayer, Hand.MAIN_HAND, result)),
+                        hitPos.relative(direction), direction);
+
+                item.place(context);
+
+
             }else if(shooter instanceof IPlaceBlockResponder){
                 ItemStack stack = ((IPlaceBlockResponder) shooter).onPlaceBlock();
                 if(stack.isEmpty() || !(stack.getItem() instanceof BlockItem))
@@ -100,6 +121,11 @@ public class EffectPlaceBlock extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.DISPENSER;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentAOE.INSTANCE, AugmentPierce.INSTANCE);
     }
 
     @Override

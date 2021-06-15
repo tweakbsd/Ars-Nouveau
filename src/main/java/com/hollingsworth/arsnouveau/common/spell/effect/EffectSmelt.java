@@ -7,6 +7,8 @@ import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDampen;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentPierce;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
@@ -27,10 +29,12 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class EffectSmelt extends AbstractEffect {
+    public static EffectSmelt INSTANCE = new EffectSmelt();
 
-    public EffectSmelt() {
+    private EffectSmelt() {
         super(GlyphLib.EffectSmeltID, "Smelt");
     }
 
@@ -42,7 +46,7 @@ public class EffectSmelt extends AbstractEffect {
 
         int aoeBuff = getBuffCount(augments, AugmentAOE.class);
         int pierceBuff = getBuffCount(augments, AugmentPierce.class);
-        int maxItemSmelt = 3 + 4*aoeBuff*pierceBuff;
+        int maxItemSmelt = 3 + 4 * aoeBuff + 4 * pierceBuff;
 
         List<BlockPos> posList = SpellUtil.calcAOEBlocks(shooter, ((BlockRayTraceResult) rayTraceResult).getBlockPos(), (BlockRayTraceResult)rayTraceResult,aoeBuff, pierceBuff);
         List<ItemEntity> itemEntities = world.getEntitiesOfClass(ItemEntity.class, new AxisAlignedBB(((BlockRayTraceResult) rayTraceResult).getBlockPos()).inflate(aoeBuff + 1.0));
@@ -100,6 +104,14 @@ public class EffectSmelt extends AbstractEffect {
     @Override
     public boolean wouldSucceed(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments) {
         return rayTraceResult instanceof BlockRayTraceResult;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(
+                AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE,
+                AugmentAOE.INSTANCE, AugmentPierce.INSTANCE
+        );
     }
 
     @Override

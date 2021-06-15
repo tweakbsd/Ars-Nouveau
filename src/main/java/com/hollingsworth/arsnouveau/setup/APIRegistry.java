@@ -20,28 +20,6 @@ public class APIRegistry {
                 new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentAmplifyID)),
                 new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentAmplifyID)),
                 new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentAmplifyID))}, 3000));
-//
-//        registerApparatusRecipe(new EnchantmentRecipe(new ItemStack[]{
-//                new ItemStack(Items.BLAZE_POWDER),
-//                new ItemStack(Items.BLAZE_POWDER),
-//                new ItemStack(Items.BLAZE_POWDER),
-//                new ItemStack(Items.BLAZE_POWDER),
-//                new ItemStack(Items.GOLD_BLOCK),
-//                new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentExtendTimeID)),
-//                new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentAOEID)),
-//                new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentDampenID))
-//        }, EnchantmentRegistry.REACTIVE_ENCHANTMENT, 2, 6000));
-//
-//        registerApparatusRecipe(new EnchantmentRecipe(new ItemStack[]{
-//                ItemsRegistry.mythicalClay.getStack(),
-//                ItemsRegistry.mythicalClay.getStack(),
-//                ItemsRegistry.mythicalClay.getStack(),
-//                ItemsRegistry.mythicalClay.getStack(),
-//                new ItemStack(Items.ENDER_PEARL),
-//                new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentPierceID)),
-//                new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentExtractID)),
-//                new ItemStack(ArsNouveauAPI.getInstance().getGlyphItem(GlyphLib.AugmentFortuneID))
-//        }, EnchantmentRegistry.REACTIVE_ENCHANTMENT, 3, 9000));
 
         registerApparatusRecipe(new SpellWriteRecipe());
     }
@@ -51,90 +29,82 @@ public class APIRegistry {
     }
 
     public static void registerSpells() {
-        registerSpell(new MethodProjectile());
-        registerSpell(new MethodTouch());
-        registerSpell(new MethodSelf());
-        registerSpell(new EffectBreak());
-        registerSpell(new EffectHarm());
-        registerSpell(new EffectIgnite());
-        registerSpell(new EffectPhantomBlock());
-        registerSpell(new EffectHeal());
-        registerSpell(new EffectGrow());
-        registerSpell(new EffectKnockback());
-        registerSpell(new EffectHaste());
-        registerSpell(new EffectLight());
-        registerSpell(new EffectDispel());
-        registerSpell(new EffectFreeze());
-        registerSpell(new EffectLaunch());
-        registerSpell(new EffectPull());
-        registerSpell(new EffectBlink());
-        registerSpell(new EffectExplosion());
-        registerSpell(new EffectLightning());
-        registerSpell(new EffectSlowfall());
-        registerSpell(new EffectShield());
-        registerSpell(new EffectAquatic());
-        registerSpell(new EffectFangs());
-        registerSpell(new EffectSummonVex());
-        registerSpell(new EffectStrength());
-        registerSpell(new AugmentAccelerate());
-        registerSpell(new AugmentSplit());
-        registerSpell(new AugmentAmplify());
-        registerSpell(new AugmentAOE());
-        registerSpell(new AugmentExtendTime());
-        registerSpell(new AugmentPierce());
-        registerSpell(new AugmentDampen());
-        registerSpell(new AugmentExtract());
-        registerSpell(new AugmentFortune());
-        registerSpell(new EffectEnderChest());
-        registerSpell(new EffectHarvest());
-        registerSpell(new EffectFell());
-        registerSpell(new EffectPickup());
-        registerSpell(new EffectInteract());
-        registerSpell(new EffectPlaceBlock());
-        registerSpell(new MethodRune());
-        registerSpell(new EffectSnare());
-        registerSpell(new EffectSmelt());
-        registerSpell(new EffectLeap());
-        registerSpell(new EffectDelay());
-        registerSpell(new EffectRedstone());
-        registerSpell(new EffectIntangible());
-        registerSpell(new EffectInvisibility());
-        registerSpell(new AugmentDurationDown());
-        registerSpell(new EffectWither());
-        registerSpell(new EffectExchange());
-        registerSpell(new EffectCraft());
-        registerSpell(new EffectFlare());
-        registerSpell(new EffectColdSnap());
-        registerSpell(new EffectConjureWater());
-        registerSpell(new EffectGravity());
-        registerSpell(new EffectCut());
-        registerSpell(new EffectCrush());
-        registerSpell(new EffectSummonWolves());
-        registerSpell(new EffectSummonSteed());
-        registerSpell(new EffectSummonDecoy());
-        registerSpell(new EffectHex());
-        registerSpell(new MethodUnderfoot());
-        registerStartingSpells();
+        registerSpell(MethodProjectile.INSTANCE);
+        registerSpell(MethodTouch.INSTANCE);
+        registerSpell(MethodSelf.INSTANCE);
+        registerSpell(EffectBreak.INSTANCE);
+        registerSpell(EffectHarm.INSTANCE);
+        registerSpell(EffectIgnite.INSTANCE);
+        registerSpell(EffectPhantomBlock.INSTANCE);
+        registerSpell(EffectHeal.INSTANCE);
+        registerSpell(EffectGrow.INSTANCE);
+        registerSpell(EffectKnockback.INSTANCE);
+        registerSpell(EffectHaste.INSTANCE);
+        registerSpell(EffectLight.INSTANCE);
+        registerSpell(EffectDispel.INSTANCE);
+        registerSpell(EffectFreeze.INSTANCE);
+        registerSpell(EffectLaunch.INSTANCE);
+        registerSpell(EffectPull.INSTANCE);
+        registerSpell(EffectBlink.INSTANCE);
+        registerSpell(EffectExplosion.INSTANCE);
+        registerSpell(EffectLightning.INSTANCE);
+        registerSpell(EffectSlowfall.INSTANCE);
+        registerSpell(EffectShield.INSTANCE);
+        registerSpell(EffectAquatic.INSTANCE);
+        registerSpell(EffectFangs.INSTANCE);
+        registerSpell(EffectSummonVex.INSTANCE);
+        registerSpell(EffectStrength.INSTANCE);
+        registerSpell(AugmentAccelerate.INSTANCE);
+        registerSpell(AugmentSplit.INSTANCE);
+        registerSpell(AugmentAmplify.INSTANCE);
+        registerSpell(AugmentAOE.INSTANCE);
+        registerSpell(AugmentExtendTime.INSTANCE);
+        registerSpell(AugmentPierce.INSTANCE);
+        registerSpell(AugmentDampen.INSTANCE);
+        registerSpell(AugmentExtract.INSTANCE);
+        registerSpell(AugmentFortune.INSTANCE);
+        registerSpell(EffectEnderChest.INSTANCE);
+        registerSpell(EffectHarvest.INSTANCE);
+        registerSpell(EffectFell.INSTANCE);
+        registerSpell(EffectPickup.INSTANCE);
+        registerSpell(EffectInteract.INSTANCE);
+        registerSpell(EffectPlaceBlock.INSTANCE);
+        registerSpell(MethodRune.INSTANCE);
+        registerSpell(EffectSnare.INSTANCE);
+        registerSpell(EffectSmelt.INSTANCE);
+        registerSpell(EffectLeap.INSTANCE);
+        registerSpell(EffectDelay.INSTANCE);
+        registerSpell(EffectRedstone.INSTANCE);
+        registerSpell(EffectIntangible.INSTANCE);
+        registerSpell(EffectInvisibility.INSTANCE);
+        registerSpell(AugmentDurationDown.INSTANCE);
+        registerSpell(EffectWither.INSTANCE);
+        registerSpell(EffectExchange.INSTANCE);
+        registerSpell(EffectCraft.INSTANCE);
+        registerSpell(EffectFlare.INSTANCE);
+        registerSpell(EffectColdSnap.INSTANCE);
+        registerSpell(EffectConjureWater.INSTANCE);
+        registerSpell(EffectGravity.INSTANCE);
+        registerSpell(EffectCut.INSTANCE);
+        registerSpell(EffectCrush.INSTANCE);
+        registerSpell(EffectSummonWolves.INSTANCE);
+        registerSpell(EffectSummonSteed.INSTANCE);
+        registerSpell(EffectSummonDecoy.INSTANCE);
+        registerSpell(EffectHex.INSTANCE);
+        registerSpell(MethodUnderfoot.INSTANCE);
+        registerSpell(EffectGlide.INSTANCE);
 
         registerRitual(new RitualDig());
-        registerRitual(new RitualNight());
-        registerRitual(new RitualClearWeather());
-        registerRitual(new RitualDay());
-        registerRitual(new RitualStorm());
+        registerRitual(new RitualMoonfall());
+        registerRitual(new RitualCloudshaper());
+        registerRitual(new RitualSunrise());
         registerRitual(new RitualExpDrain());
         registerRitual(new RitualPillagerRaid());
-    }
-
-    public static void registerStartingSpells() {
-        addStartingSpell(GlyphLib.MethodProjectileID);
-        addStartingSpell(GlyphLib.MethodTouchID);
-        addStartingSpell(GlyphLib.MethodSelfID);
-        addStartingSpell(GlyphLib.EffectBreakID);
-        addStartingSpell(GlyphLib.EffectHarmID);
-    }
-
-    public static void addStartingSpell(String spellTag) {
-        ArsNouveauAPI.getInstance().addStartingSpell(spellTag);
+        registerRitual(new RitualOvergrowth());
+        registerRitual(new RitualBreed());
+        registerRitual(new RitualHealing());
+        registerRitual(new RitualWarp());
+        registerRitual(new ScryingRitual());
     }
 
     public static void registerSpell(AbstractSpellPart spellPart) {

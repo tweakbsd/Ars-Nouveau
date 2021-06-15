@@ -7,8 +7,10 @@ import com.hollingsworth.arsnouveau.setup.BlockRegistry;
 import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -39,7 +41,6 @@ public class ClientHandler {
         ClientRegistry.bindTileEntityRenderer(BlockRegistry.SUMMONING_CRYSTAL_TILE, SummoningCrystalRenderer::new);
         ClientRegistry.bindTileEntityRenderer(BlockRegistry.POTION_MELDER_TYPE, PotionMelderRenderer::new);
         ClientRegistry.bindTileEntityRenderer(BlockRegistry.RITUAL_TILE, RitualBrazierRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(BlockRegistry.SCONCE_TILE, SconceRenderer::new);
 
         RenderTypeLookup.setRenderLayer(BlockRegistry.MANA_JAR, RenderType.translucent());
         RenderTypeLookup.setRenderLayer(BlockRegistry.GLYPH_PRESS_BLOCK, RenderType.cutout());
@@ -64,11 +65,15 @@ public class ClientHandler {
         RenderTypeLookup.setRenderLayer(BlockRegistry.BLAZING_SAPLING, RenderType.cutout());
         RenderTypeLookup.setRenderLayer(BlockRegistry.CASCADING_SAPLING, RenderType.cutout());
         RenderTypeLookup.setRenderLayer(BlockRegistry.MANA_GEM_BLOCK, RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(BlockRegistry.POTION_JAR, RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(BlockRegistry.POTION_MELDER, RenderType.translucent());
+        RenderTypeLookup.setRenderLayer(BlockRegistry.POTION_JAR, RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(BlockRegistry.POTION_MELDER, RenderType.cutout());
         RenderTypeLookup.setRenderLayer(BlockRegistry.RITUAL_BLOCK, RenderType.cutout());
         RenderTypeLookup.setRenderLayer(BlockRegistry.SCONCE_BLOCK, RenderType.cutout());
-
+        evt.enqueueWork(() -> {
+            ItemModelsProperties.register(ItemsRegistry.ENCHANTERS_SHIELD,new ResourceLocation(ArsNouveau.MODID,"blocking"), (p_239421_0_, p_239421_1_, p_239421_2_) -> {
+                return p_239421_2_ != null && p_239421_2_.isUsingItem() && p_239421_2_.getUseItem() == p_239421_0_ ? 1.0F : 0.0F;
+            });
+        });
     }
 
     @SubscribeEvent

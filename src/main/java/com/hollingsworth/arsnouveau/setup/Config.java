@@ -4,8 +4,10 @@ import com.hollingsworth.arsnouveau.api.ArsNouveauAPI;
 import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,13 +51,17 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue STALKER_ATTACK_ANIMALS;
     public static ForgeConfigSpec.BooleanValue GUARDIAN_ATTACK_ANIMALS;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> DIMENSION_BLACKLIST;
-    private static Map<String, ForgeConfigSpec.BooleanValue> enabledSpells = new HashMap<>();
-    private static Map<String, ForgeConfigSpec.BooleanValue> startingSpells = new HashMap<>();
-    private static Map<String, ForgeConfigSpec.IntValue> spellCost = new HashMap<>();
+
     public static Map<String, Integer> addonSpellCosts = new HashMap<>();
 
+
+    public static ForgeConfigSpec.IntValue ARCHWOOD_FOREST_WEIGHT;
+    public static ForgeConfigSpec.ConfigValue<? extends String> CRYSTALLIZER_ITEM;
+
+
     public static boolean isSpellEnabled(String tag){
-        return enabledSpells.containsKey(tag) ? enabledSpells.get(tag).get() : true;
+        AbstractSpellPart spellPart = ArsNouveauAPI.getInstance().getSpell_map().get(tag);
+        return spellPart.ENABLED == null || spellPart.ENABLED.get();
     }
 
     public static void putAddonSpellCost(String tag, int cost){
@@ -69,12 +75,16 @@ public class Config {
                         ArsNouveauAPI.getInstance().getSpell_map().get(tag).getManaCost() : 0);
     }
 
+    private static Map<String, ForgeConfigSpec.IntValue> spellCost = new HashMap<>();
     /**
      * Returns the mana cost specified in the Ars Nouveau config, or falls back to the addon spell cost map. If not there, falls back to the method cost.
      */
+    @Deprecated // Use config sensitive cost
     public static int getSpellCost(String tag){
         return spellCost.containsKey(tag + "_cost") ? spellCost.get(tag+"_cost").get() : getAddonSpellCost(tag);
     }
+
+    public static Map<String, ForgeConfigSpec> SPELL_CONFIG = new HashMap<>();
 
     static {
         ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
@@ -82,7 +92,6 @@ public class Config {
 
         SERVER_BUILDER.comment("General settings").push(CATEGORY_GENERAL);
         DIMENSION_BLACKLIST = SERVER_BUILDER.comment("Dimensions where hostile mobs will not spawn. Ex: minecraft:overworld. Run /forge dimensions for a list.").defineList("dimensionBlacklist", new ArrayList<>(),(o) -> true);
-
         SPAWN_ORE = SERVER_BUILDER.comment("Spawn Arcane Ore in the world").define("genOre", true);
         TREE_SPAWN_RATE = SERVER_BUILDER.comment("Rate of tree spawn per chunk").defineInRange("genTrees", 0.002, 0.0d, 1.0d);
         SPAWN_BERRIES = SERVER_BUILDER.comment("Spawn Mana Berry Bushes in the world").define("genBerries", true);
@@ -95,8 +104,10 @@ public class Config {
         HUNTER_ATTACK_ANIMALS = SERVER_BUILDER.comment("Should the Wilden Hunter attack animals?").define("hunterHuntsAnimals", true);
         STALKER_ATTACK_ANIMALS = SERVER_BUILDER.comment("Should the Wilden Stalker attack animals?").define("stalkerHuntsAnimals", false);
         GUARDIAN_ATTACK_ANIMALS = SERVER_BUILDER.comment("Should the Wilden Defender attack animals?").define("defenderHuntsAnimals", false);
-
+        ARCHWOOD_FOREST_WEIGHT = SERVER_BUILDER.comment("Archwood forest spawn weight").defineInRange("archwoodForest", 3, 0, Integer.MAX_VALUE);
+        CRYSTALLIZER_ITEM = SERVER_BUILDER.comment("Crystallizer output item. Do not use a wrong ID!").define("crystallizer_output", "ars_nouveau:mana_gem");
         SERVER_BUILDER.pop();
+
         SERVER_BUILDER.comment("Mana").push("mana");
         INIT_MANA_REGEN = SERVER_BUILDER.comment("Base mana regen in seconds").defineInRange("baseRegen", 5, 0, Integer.MAX_VALUE);
         INIT_MAX_MANA = SERVER_BUILDER.comment("Base max mana").defineInRange("baseMax", 100, 0, Integer.MAX_VALUE);
@@ -109,55 +120,29 @@ public class Config {
         GLYPH_REGEN_BONUS = SERVER_BUILDER.comment("Regen bonus per glyph").defineInRange("glyphRegen", 0.33, 0.0, Integer.MAX_VALUE);
         MANA_REGEN_POTION = SERVER_BUILDER.comment("Regen bonus per potion level").defineInRange("potionRegen", 10, 0, Integer.MAX_VALUE);
         SERVER_BUILDER.pop();
-        SERVER_BUILDER.comment("Enabled Spells").push(CATEGORY_SPELLS);
-        for(AbstractSpellPart spellPart : ArsNouveauAPI.getInstance().getSpell_map().values()){
-            enabledSpells.put(spellPart.tag, SERVER_BUILDER.comment(spellPart.name + " enabled?").define(spellPart.tag, true));
-        }
-        SERVER_BUILDER.pop();
-        SERVER_BUILDER.comment("Spell Cost").push("spell_cost");
-        for(AbstractSpellPart spellPart : ArsNouveauAPI.getInstance().getSpell_map().values()){
-            spellCost.put(spellPart.tag + "_cost", SERVER_BUILDER.comment(spellPart.name + " cost").defineInRange(spellPart.tag+ "_cost", spellPart.getManaCost(), Integer.MIN_VALUE, Integer.MAX_VALUE));
-        }
-        SERVER_BUILDER.pop();
-        SERVER_BUILDER.comment("Starting Spells").push("Starter Spells");
-        for(AbstractSpellPart spellPart : ArsNouveauAPI.getInstance().getDefaultStartingSpells()){
-            startingSpells.put(spellPart.tag + "_starter", SERVER_BUILDER.define(spellPart.tag+ "_starter", true));
-        }
-        SERVER_BUILDER.pop();
+
         SERVER_CONFIG = SERVER_BUILDER.build();
+        FMLPaths.getOrCreateGameRelativePath(FMLPaths.CONFIGDIR.get().resolve("ars_nouveau"), "ars_nouveau");
+        for(AbstractSpellPart spellPart : ArsNouveauAPI.getInstance().getSpell_map().values()){
+
+            ForgeConfigSpec spec;
+            ForgeConfigSpec.Builder spellBuilder = new ForgeConfigSpec.Builder();
+            spellPart.buildConfig(spellBuilder);
+            spec = spellBuilder.build();
+            spellPart.CONFIG = spec;
+            ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, spellPart.CONFIG, "ars_nouveau/" + spellPart.tag +".toml");
+            SPELL_CONFIG.put(spellPart.tag, spec);
+
+        }
     }
 
     public static boolean isStarterEnabled(AbstractSpellPart e){
-        return startingSpells.entrySet().stream().noneMatch(entry -> entry.getValue().get() == false && entry.getKey().replace("_starter", "").equals(e.tag));
-    }
-
-//    public static List<AbstractSpellPart> getStarterSpells(){
-//        return startingSpells.entrySet().stream()
-//                .filter(entry -> entry.getValue().get())
-//                .map(entry -> ArsNouveauAPI.getInstance().getSpell_map().get(entry.getKey().replace("_starter", "")))
-//                .collect(Collectors.toList());
-//    }
-
-
-    @SubscribeEvent
-    public static void onLoad(final ModConfig.Loading configEvent) {
-//        startingSpells.entrySet().forEach(entry -> {
-//            System.out.println(entry);
-//            if(!entry.getValue().get()){
-//                ArsNouveauAPI.getInstance().getDefaultStartingSpells().removeIf(a -> a.tag.equals(entry.getKey().replace("_starter", "")));
-//            }
-//        });
-//        ArsNouveauAPI.getInstance().getDefaultStartingSpells() = ArsNouveauAPI.getInstance().getDefaultStartingSpells().stream().filter(a -> startingSpells.get(a.tag));
+        return e.STARTER_SPELL != null && e.STARTER_SPELL.get();
     }
 
     @SubscribeEvent
-    public static void onReload(final ModConfig.Reloading configEvent) {
-//        startingSpells.entrySet().forEach(entry -> {
-//            System.out.println(entry);
-//            if(!entry.getValue().get()){
-//                System.out.println(entry.getKey());
-//                ArsNouveauAPI.getInstance().getDefaultStartingSpells().removeIf(a -> a.tag.equals(entry.getKey().replace("_starter", "")));
-//            }
-//        });
-    }
+    public static void onLoad(final ModConfig.Loading configEvent) { }
+
+    @SubscribeEvent
+    public static void onReload(final ModConfig.Reloading configEvent) { }
 }

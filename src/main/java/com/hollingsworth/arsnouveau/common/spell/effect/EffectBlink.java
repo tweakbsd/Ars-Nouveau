@@ -1,10 +1,15 @@
 package com.hollingsworth.arsnouveau.common.spell.effect;
 
 import com.hollingsworth.arsnouveau.GlyphLib;
-import com.hollingsworth.arsnouveau.api.spell.*;
+import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
+import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
+import com.hollingsworth.arsnouveau.api.spell.IInventoryResponder;
+import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.common.items.WarpScroll;
 import com.hollingsworth.arsnouveau.common.network.Networking;
 import com.hollingsworth.arsnouveau.common.network.PacketWarpPosition;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDampen;
 import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -14,26 +19,29 @@ import net.minecraft.item.Items;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectBlink extends AbstractEffect {
+    public static EffectBlink INSTANCE = new EffectBlink();
 
-    public EffectBlink() {
+    private EffectBlink() {
         super(GlyphLib.EffectBlinkID, "Blink");
     }
 
     @Override
     public void onResolveEntity(EntityRayTraceResult rayTraceResult, World world, @Nullable LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         Vector3d vec = safelyGetHitPos(rayTraceResult);
-        double distance = 8.0f + 3.0f *getAmplificationBonus(augments);
+        double distance = GENERIC_INT.get() + AMP_VALUE.get() *getAmplificationBonus(augments);
 
         if(spellContext.castingTile instanceof IInventoryResponder){
             ItemStack scroll = ((IInventoryResponder) spellContext.castingTile).getItem(new ItemStack(ItemsRegistry.warpScroll));
@@ -50,8 +58,6 @@ public class EffectBlink extends AbstractEffect {
             blinkForward(world, shooter, distance);
             return;
         }
-
-
 
         if(isRealPlayer(shooter) && spellContext.castingTile == null && shooter != null) {
             if(shooter.getOffhandItem().getItem() instanceof WarpScroll){
@@ -126,6 +132,13 @@ public class EffectBlink extends AbstractEffect {
     }
 
     @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addGenericInt(builder, 8, "Base teleport distance", "distance");
+        addAmpConfig(builder, 3.0);
+    }
+
+    @Override
     public boolean dampenIsAllowed() {
         return true;
     }
@@ -151,6 +164,11 @@ public class EffectBlink extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.ENDER_PEARL;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE);
     }
 
     @Override

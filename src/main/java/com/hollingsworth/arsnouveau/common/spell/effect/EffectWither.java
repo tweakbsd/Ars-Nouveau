@@ -11,12 +11,16 @@ import net.minecraft.item.Items;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectWither extends AbstractEffect {
-    public EffectWither() {
+    public static EffectWither INSTANCE = new EffectWither();
+
+    private EffectWither() {
         super(GlyphLib.EffectWitherID, "Wither");
     }
 
@@ -26,7 +30,14 @@ public class EffectWither extends AbstractEffect {
         Entity entity = rayTraceResult.getEntity();
         if(!(entity instanceof LivingEntity))
             return;
-        applyPotion((LivingEntity) entity, Effects.WITHER,augments);
+        applyConfigPotion((LivingEntity) entity, Effects.WITHER,augments);
+    }
+
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addPotionConfig(builder, 30);
+        addExtendTimeConfig(builder, 8);
     }
 
     @Override
@@ -42,6 +53,11 @@ public class EffectWither extends AbstractEffect {
     @Override
     public Tier getTier() {
         return Tier.THREE;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return POTION_AUGMENTS;
     }
 
     @Override

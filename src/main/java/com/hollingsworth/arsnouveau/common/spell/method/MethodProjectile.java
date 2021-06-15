@@ -26,10 +26,12 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class MethodProjectile extends AbstractCastMethod {
+    public static MethodProjectile INSTANCE = new MethodProjectile();
 
-    public MethodProjectile() {
+    private MethodProjectile() {
         super(GlyphLib.MethodProjectileID, "Projectile");
     }
 
@@ -144,6 +146,11 @@ public class MethodProjectile extends AbstractCastMethod {
     }
 
     @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentPierce.INSTANCE, AugmentSplit.INSTANCE, AugmentAccelerate.INSTANCE);
+    }
+
+    @Override
     public String getBookDescription() {
         return "A spell you start with. Summons a projectile that applies spell effects when this projectile hits a target or block.";
     }
@@ -151,5 +158,10 @@ public class MethodProjectile extends AbstractCastMethod {
     @Override
     public Item getCraftingReagent() {
         return Items.BOW;
+    }
+
+    @Override
+    public boolean defaultedStarterGlyph() {
+        return true;
     }
 }

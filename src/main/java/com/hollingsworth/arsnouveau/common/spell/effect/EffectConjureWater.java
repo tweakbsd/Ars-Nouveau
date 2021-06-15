@@ -23,9 +23,13 @@ import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectConjureWater extends AbstractEffect {
-    public EffectConjureWater() {
+
+    public static EffectConjureWater INSTANCE = new EffectConjureWater();
+
+    private EffectConjureWater() {
         super(GlyphLib.EffectConjureWaterID, "Conjure Water");
     }
 
@@ -59,6 +63,11 @@ public class EffectConjureWater extends AbstractEffect {
     @Override
     public int getManaCost() {
         return 80;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentAOE.INSTANCE, AugmentPierce.INSTANCE);
     }
 
     @Override

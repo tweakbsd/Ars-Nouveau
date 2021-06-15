@@ -6,7 +6,7 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.client.particle.ParticleUtil;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
+import com.hollingsworth.arsnouveau.common.spell.augment.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -17,14 +17,16 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectFlare extends AbstractEffect {
-    public EffectFlare() {
+    public static EffectFlare INSTANCE = new EffectFlare();
+
+    private EffectFlare() {
         super(GlyphLib.EffectFlareID, "Flare");
     }
 
@@ -36,9 +38,9 @@ public class EffectFlare extends AbstractEffect {
                 return;
             LivingEntity livingEntity = (LivingEntity) entity;
             Vector3d vec = safelyGetHitPos(rayTraceResult);
-            float damage = 6.0f + 3.0f*getAmplificationBonus(augments);
+            float damage = (float) (DAMAGE.get() + AMP_VALUE.get()*getAmplificationBonus(augments));
             int range = 3 + getBuffCount(augments, AugmentAOE.class);
-            int fireSec = 5 + getDurationModifier(augments);
+            int fireSec = 5 + EXTEND_TIME.get() * getDurationModifier(augments);
             if(livingEntity.isOnFire()){
                 dealDamage(world, shooter, damage, augments, livingEntity, buildDamageSource(world, shooter).setIsFire().bypassArmor());
                 ((ServerWorld)world).sendParticles(ParticleTypes.FLAME, vec.x, vec.y +0.5, vec.z,50,
@@ -58,8 +60,26 @@ public class EffectFlare extends AbstractEffect {
     }
 
     @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addDamageConfig(builder, 6.0);
+        addAmpConfig(builder, 3.0);
+        addExtendTimeConfig(builder, 1);
+    }
+
+    @Override
     public int getManaCost() {
         return 40;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(
+                AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE,
+                AugmentExtendTime.INSTANCE, AugmentDurationDown.INSTANCE,
+                AugmentAOE.INSTANCE,
+                AugmentFortune.INSTANCE
+        );
     }
 
     @Override
@@ -69,7 +89,7 @@ public class EffectFlare extends AbstractEffect {
 
     @Override
     public Item getCraftingReagent() {
-        return ArsNouveauAPI.getInstance().getGlyphItem(new EffectIgnite());
+        return ArsNouveauAPI.getInstance().getGlyphItem(EffectIgnite.INSTANCE);
     }
 
     @Override

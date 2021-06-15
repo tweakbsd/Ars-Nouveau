@@ -6,6 +6,8 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.common.block.RedstoneAir;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDampen;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import com.hollingsworth.arsnouveau.setup.BlockRegistry;
 import net.minecraft.block.BlockState;
@@ -17,12 +19,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectRedstone extends AbstractEffect {
-    public EffectRedstone() {
+    public static EffectRedstone INSTANCE = new EffectRedstone();
+
+    private EffectRedstone() {
         super(GlyphLib.EffectRedstoneID, "Redstone Signal");
     }
 
@@ -42,7 +48,7 @@ public class EffectRedstone extends AbstractEffect {
             }
             int timeBonus = getBuffCount(augments, AugmentExtendTime.class);
             world.setBlockAndUpdate(pos, state);
-            world.getBlockTicks().scheduleTick(pos, state.getBlock(), 5 + timeBonus * 10);
+            world.getBlockTicks().scheduleTick(pos, state.getBlock(), GENERIC_INT.get() + timeBonus * BONUS_TIME.get());
 
             BlockPos hitPos = pos.relative(((BlockRayTraceResult) rayTraceResult).getDirection().getOpposite());
 
@@ -52,10 +58,24 @@ public class EffectRedstone extends AbstractEffect {
         }
     }
 
+
+    public ForgeConfigSpec.IntValue BONUS_TIME;
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addGenericInt(builder, 5, "Base time in ticks", "base_duration");
+        BONUS_TIME = builder.comment("Extend time bonus, in ticks").defineInRange("extend_time", 10, 0, Integer.MAX_VALUE);
+    }
+
     @Nullable
     @Override
     public Item getCraftingReagent() {
         return Items.REDSTONE_BLOCK;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE, AugmentExtendTime.INSTANCE);
     }
 
     @Override

@@ -22,13 +22,16 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ExplosionContext;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectExplosion extends AbstractEffect {
+    public static EffectExplosion INSTANCE = new EffectExplosion();
 
-    public EffectExplosion() {
+    private EffectExplosion() {
         super(GlyphLib.EffectExplosionID, "Explosion");
     }
 
@@ -39,17 +42,19 @@ public class EffectExplosion extends AbstractEffect {
 
         Vector3d vec = safelyGetHitPos(rayTraceResult);
 
-        float intensity = 0.75f + 0.5f*getBuffCount(augments, AugmentAmplify.class) + 1.5f*getBuffCount(augments, AugmentAOE.class);
+        double intensity = BASE.get() + AMP_VALUE.get()*getBuffCount(augments, AugmentAmplify.class) + AOE_BONUS.get()*getBuffCount(augments, AugmentAOE.class);
         int dampen = getBuffCount(augments, AugmentDampen.class);
         intensity -= 0.5 * dampen;
         Explosion.Mode mode = hasBuff(augments, AugmentDampen.class) ? Explosion.Mode.NONE  : Explosion.Mode.DESTROY;
         mode = hasBuff(augments, AugmentExtract.class) ? Explosion.Mode.BREAK : mode;
-        explode(world, shooter, null, null, vec.x, vec.y, vec.z, intensity, false, mode, augments);
+        explode(world, shooter, null, null, vec.x, vec.y, vec.z, (float) intensity, false, mode, augments);
     }
 
     public Explosion explode(World world, @Nullable Entity e, @Nullable DamageSource source, @Nullable ExplosionContext context,
                              double x, double y, double z, float radius, boolean p_230546_11_, Explosion.Mode p_230546_12_, List<AbstractAugment> augments) {
         ANExplosion explosion = new ANExplosion(world, e, source, context, x, y, z, radius, p_230546_11_, p_230546_12_, getAmplificationBonus(augments));
+        explosion.baseDamage = DAMAGE.get();
+        explosion.ampDamageScalar = AMP_DAMAGE.get();
         if (net.minecraftforge.event.ForgeEventFactory.onExplosionStart(world, explosion)) return explosion;
         explosion.explode();
         explosion.finalizeExplosion(false);
@@ -64,6 +69,20 @@ public class EffectExplosion extends AbstractEffect {
         }
 
         return explosion;
+    }
+
+    public ForgeConfigSpec.DoubleValue BASE;
+    public ForgeConfigSpec.DoubleValue AOE_BONUS;
+    public ForgeConfigSpec.DoubleValue AMP_DAMAGE;
+
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addAmpConfig(builder, 0.5);
+        BASE = builder.comment("Explosion base intensity").defineInRange("base", 0.75, 0.0, 100);
+        AOE_BONUS = builder.comment("AOE intensity bonus").defineInRange("aoe_bonus", 1.5, 0.0, 100);
+        addDamageConfig(builder, 6.0);
+        AMP_DAMAGE = builder.comment("Additional damage per amplify").defineInRange("amp_damage", 2.5, 0.0, Integer.MAX_VALUE);
     }
 
     @Override
@@ -85,6 +104,15 @@ public class EffectExplosion extends AbstractEffect {
     @Override
     public Tier getTier() {
         return Tier.TWO;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(
+                AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE,
+                AugmentAOE.INSTANCE,
+                AugmentExtract.INSTANCE
+        );
     }
 
     @Override

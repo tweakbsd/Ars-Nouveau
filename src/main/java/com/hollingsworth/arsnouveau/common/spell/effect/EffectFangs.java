@@ -5,7 +5,7 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.common.entity.EntityEvokerFangs;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAccelerate;
+import com.hollingsworth.arsnouveau.common.spell.augment.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -18,16 +18,17 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.util.FakePlayerFactory;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectFangs extends AbstractEffect {
+    public static EffectFangs INSTANCE = new EffectFangs();
 
-    public EffectFangs() {
+    private EffectFangs() {
         super(GlyphLib.EffectFangsID, "Fangs");
     }
 
@@ -43,7 +44,7 @@ public class EffectFangs extends AbstractEffect {
             return;
         Vector3d vec = rayTraceResult.getLocation();
 
-        float bonusDamage = 3f * getAmplificationBonus(augments);
+        double damage = DAMAGE.get() + AMP_VALUE.get() * getAmplificationBonus(augments);
         double targetX = vec.x;
         double targetY = vec.y;
         double targetZ = vec.z;
@@ -55,8 +56,15 @@ public class EffectFangs extends AbstractEffect {
         for(int l = 0; l < 16; ++l) {
             double d2 = 1.25D * (double)(l + 1);
             int j =  ( l + getDurationModifier(augments)) / (1 + getBuffCount(augments, AugmentAccelerate.class));
-            this.spawnFangs(world, shooter.getX() + (double)MathHelper.cos(f) * d2, shooter.getZ() + (double)MathHelper.sin(f) * d2, d0, d1, f, j, shooter, bonusDamage);
+            this.spawnFangs(world, shooter.getX() + (double)MathHelper.cos(f) * d2, shooter.getZ() + (double)MathHelper.sin(f) * d2, d0, d1, f, j, shooter, (float) damage);
         }
+    }
+
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addDamageConfig(builder, 6.0);
+        addAmpConfig(builder, 3.0);
     }
 
     @Override
@@ -69,7 +77,7 @@ public class EffectFangs extends AbstractEffect {
         return true;
     }
 
-    private void spawnFangs(World world, double xAngle, double zAngle, double yStart, double yEnd, float rotationYaw, int tickDelay, LivingEntity caster, float bonusDamage) {
+    private void spawnFangs(World world, double xAngle, double zAngle, double yStart, double yEnd, float rotationYaw, int tickDelay, LivingEntity caster, float damage) {
         BlockPos blockpos = new BlockPos(xAngle, yEnd, zAngle);
         boolean flag = false;
         double d0 = 0.0D;
@@ -97,7 +105,7 @@ public class EffectFangs extends AbstractEffect {
         }
 
         if (flag) {
-           world.addFreshEntity(new EntityEvokerFangs(world, xAngle, (double)blockpos.getY() + d0, zAngle, rotationYaw, tickDelay, caster, bonusDamage));
+           world.addFreshEntity(new EntityEvokerFangs(world, xAngle, (double)blockpos.getY() + d0, zAngle, rotationYaw, tickDelay, caster, damage));
         }
 
     }
@@ -116,6 +124,15 @@ public class EffectFangs extends AbstractEffect {
     @Override
     public Tier getTier() {
         return Tier.THREE;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(
+                AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE,
+                AugmentExtendTime.INSTANCE, AugmentDurationDown.INSTANCE,
+                AugmentAccelerate.INSTANCE
+        );
     }
 
     @Override

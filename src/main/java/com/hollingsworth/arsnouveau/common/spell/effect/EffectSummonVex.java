@@ -6,7 +6,6 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.common.entity.EntityAllyVex;
 import com.hollingsworth.arsnouveau.common.potions.ModPotions;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
@@ -19,14 +18,16 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectSummonVex extends AbstractEffect {
-    public EffectSummonVex() {
+    public static EffectSummonVex INSTANCE = new EffectSummonVex();
+
+    private EffectSummonVex() {
         super(GlyphLib.EffectSummonVexID, "Summon Vex");
     }
 
@@ -45,7 +46,7 @@ public class EffectSummonVex extends AbstractEffect {
     }
 
     public void summonEntities(LivingEntity shooter, World world, List<AbstractAugment> augments, BlockPos pos){
-        int ticks = 20 * (15 + 10 * getBuffCount(augments, AugmentExtendTime.class));
+        int ticks = 20 * (GENERIC_INT.get() + EXTEND_TIME.get() * getDurationModifier(augments));
         for(int i = 0; i < 3; ++i) {
             BlockPos blockpos = pos.offset(-2 + shooter.getRandom().nextInt(5), 2, -2 + shooter.getRandom().nextInt(5));
             EntityAllyVex vexentity = new EntityAllyVex(world, shooter);
@@ -59,6 +60,12 @@ public class EffectSummonVex extends AbstractEffect {
         shooter.addEffect(new EffectInstance(ModPotions.SUMMONING_SICKNESS, ticks));
     }
 
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addGenericInt(builder, 15, "Base duration in seconds", "duration");
+        addExtendTimeConfig(builder, 10);
+    }
 
     @Override
     public int getManaCost() {
@@ -74,6 +81,11 @@ public class EffectSummonVex extends AbstractEffect {
     @Override
     public Tier getTier() {
         return Tier.THREE;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return SUMMON_AUGMENTS;
     }
 
     @Override

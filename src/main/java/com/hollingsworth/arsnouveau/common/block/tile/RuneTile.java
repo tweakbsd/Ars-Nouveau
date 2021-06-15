@@ -74,7 +74,7 @@ public class RuneTile extends AnimatedTile implements IPickupResponder {
             this.recipe = null;
             return;
         }
-        spell.set(0, new MethodTouch());
+        spell.set(0, MethodTouch.INSTANCE);
         this.recipe = spell;
     }
 
@@ -103,6 +103,7 @@ public class RuneTile extends AnimatedTile implements IPickupResponder {
 
     @Override
     public void tick() {
+
         if(level == null)
             return;
         if(!level.isClientSide) {

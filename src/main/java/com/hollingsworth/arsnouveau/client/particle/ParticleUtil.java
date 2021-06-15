@@ -3,6 +3,7 @@ package com.hollingsworth.arsnouveau.client.particle;
 
 import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
 import com.hollingsworth.arsnouveau.common.entity.EntityFollowProjectile;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -99,11 +100,11 @@ public class ParticleUtil {
         }
     }
 
-    public static void spawnTouch(World world, BlockPos loc){
+    public static void spawnTouch(ClientWorld world, BlockPos loc){
         spawnTouch(world, loc, defaultParticleColor());
     }
 
-    public static void spawnTouch(World world, BlockPos loc, ParticleColor particleColor){
+    public static void spawnTouch(ClientWorld world, BlockPos loc, ParticleColor particleColor){
         for(int i =0; i < 10; i++){
             double d0 = loc.getX() +0.5;;
             double d1 = loc.getY() +1.0;
@@ -112,21 +113,37 @@ public class ParticleUtil {
         }
     }
 
-    public static void spawnRitualSkyEffect(TileEntity tileEntity, Random rand, ParticleColor.IntWrapper color){
-        for(int i = 0; i < 1; i++) {
-            int min = -5;
-            int max = 5;
-            BlockPos nearPos = new BlockPos(tileEntity.getBlockPos().getX() + rand.nextInt(max - min) + min, tileEntity.getBlockPos().getY(),  tileEntity.getBlockPos().getZ() + rand.nextInt(max - min) + min);
-            BlockPos toPos = nearPos.above(rand.nextInt(3) + 10);
-            EntityFollowProjectile proj1 = new EntityFollowProjectile(tileEntity.getLevel(),
-                    tileEntity.getBlockPos().above(), toPos,
-                    color);
-//                if(getProgress() >= 10)
-            proj1.getEntityData().set(EntityFollowProjectile.SPAWN_TOUCH, true);
-            proj1.getEntityData().set(EntityFollowProjectile.DESPAWN, 15);
+    public static void spawnRitualAreaEffect(TileEntity entity, Random rand, ParticleColor color, int range){
+        BlockPos pos = entity.getBlockPos();
+        BlockPos.betweenClosedStream(pos.offset(range, 0, range), pos.offset(-range, 0, -range)).forEach(blockPos -> {
+            if(rand.nextInt(10) == 0){
+                for(int i =0; i< rand.nextInt(10); i++) {
+                    double x = blockPos.getX() + ParticleUtil.inRange(-0.5, 0.5);
+                    double y = blockPos.getY() + ParticleUtil.inRange(-0.5, 0.5);
+                    double z = blockPos.getZ() + ParticleUtil.inRange(-0.5, 0.5);
+                    entity.getLevel().addParticle(ParticleLineData.createData(color),
+                            x, y, z,
+                            x, y  + ParticleUtil.inRange(0.5, 5), z);
+                }
+            }
+        });
+    }
 
-            tileEntity.getLevel().addFreshEntity(proj1);
-        }
+    public static void spawnRitualSkyEffect(TileEntity tileEntity, Random rand, ParticleColor.IntWrapper color){
+
+        int min = -5;
+        int max = 5;
+        BlockPos nearPos = new BlockPos(tileEntity.getBlockPos().getX() + rand.nextInt(max - min) + min, tileEntity.getBlockPos().getY(),  tileEntity.getBlockPos().getZ() + rand.nextInt(max - min) + min);
+        BlockPos toPos = nearPos.above(rand.nextInt(3) + 10);
+        EntityFollowProjectile proj1 = new EntityFollowProjectile(tileEntity.getLevel(),
+                tileEntity.getBlockPos().above(), toPos,
+                color);
+//                if(getProgress() >= 10)
+        proj1.getEntityData().set(EntityFollowProjectile.SPAWN_TOUCH, true);
+        proj1.getEntityData().set(EntityFollowProjectile.DESPAWN, 15);
+
+        tileEntity.getLevel().addFreshEntity(proj1);
+
     }
 
     public static void spawnRitualSkyEffect(AbstractRitual ritual, TileEntity tileEntity, Random rand, ParticleColor.IntWrapper color){
@@ -142,4 +159,33 @@ public class ParticleUtil {
         }
     }
 
+    public static void spawnFallingSkyEffect(TileEntity tileEntity, Random rand, ParticleColor.IntWrapper color){
+        int min = -5;
+        int max = 5;
+        BlockPos nearPos = new BlockPos(tileEntity.getBlockPos().getX() + rand.nextInt(max - min) + min, tileEntity.getBlockPos().getY() + 8,  tileEntity.getBlockPos().getZ() + rand.nextInt(max - min) + min);
+        BlockPos toPos = nearPos.below(8);
+        EntityFollowProjectile proj1 = new EntityFollowProjectile(tileEntity.getLevel(),
+                nearPos, toPos,
+                color);
+
+        proj1.getEntityData().set(EntityFollowProjectile.SPAWN_TOUCH, true);
+        proj1.getEntityData().set(EntityFollowProjectile.DESPAWN, 20);
+
+        tileEntity.getLevel().addFreshEntity(proj1);
+
+    }
+
+    public static void spawnFallingSkyEffect(AbstractRitual ritual, TileEntity tileEntity, Random rand, ParticleColor.IntWrapper color){
+        int scalar = 20;
+        if(ritual.getContext().progress >= 5)
+            scalar = 10;
+        if(ritual.getContext().progress >= 10)
+            scalar = 5;
+        if(ritual.getContext().progress >= 13)
+            scalar = 3;
+        if(!ritual.getWorld().isClientSide && ritual.getProgress() <= 15 && (ritual.getWorld().getGameTime() % 20 == 0 || rand.nextInt(scalar) == 0)){
+            ParticleUtil.spawnFallingSkyEffect(tileEntity, rand, color);
+        }
+
+    }
 }

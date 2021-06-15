@@ -37,10 +37,10 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.brewing.BrewingRecipe;
 
@@ -94,7 +94,7 @@ public class WixieCauldronTile extends TileEntity implements ITickableTileEntity
         if (level.getGameTime() % 100 == 0) {
             updateInventories(); // Update the inventories available to use
 
-           // attemptFinish();
+            // attemptFinish();
         }
 
     }
@@ -185,7 +185,9 @@ public class WixieCauldronTile extends TileEntity implements ITickableTileEntity
 
         if(isCraftingPotion && recipeWrapper.recipes.size() > 0){
 
-            RecipeWrapper.SingleRecipe recipe = (RecipeWrapper.SingleRecipe) recipeWrapper.recipes.toArray()[0];
+            RecipeWrapper.SingleRecipe recipe = recipeWrapper.canCraftPotionFromInventory(count, level, worldPosition);
+            if(recipe == null)
+                return;
             if(!(recipe.recipe.get(0) instanceof PotionIngredient)){
                 isCraftingPotion = false;
                 return;
@@ -209,73 +211,20 @@ public class WixieCauldronTile extends TileEntity implements ITickableTileEntity
     }
 
     public void setRecipes(PlayerEntity playerEntity, ItemStack stack){
-        ItemStack craftingItem = stack;
         RecipeWrapper recipes = new RecipeWrapper();
-        if(craftingItem.getItem() == Items.POTION){
-
-            RecipeWrapper recipesVanilla = new RecipeWrapper();
-            RecipeWrapper recipesNotVanilla = new RecipeWrapper();
-            boolean recipeNotVanillaFound = false;
-            boolean recipeVanillaFound = false;
-
-            for(BrewingRecipe r : ArsNouveauAPI.getInstance().getAllPotionRecipes()) {
-
+        if(stack.getItem() == Items.POTION){
+            for(BrewingRecipe r : ArsNouveauAPI.getInstance().getAllPotionRecipes()){
                 if(ItemStack.matches(stack, r.getOutput())) {
                     isCraftingPotion = true;
                     List<Ingredient> list = new ArrayList<>();
-
                     list.add(new PotionIngredient(r.getInput().getItems()[0]));
                     list.add(r.getIngredient());
-
-                    boolean ingredientsContainNonVanillaItems = false;
-                    for (ItemStack item: r.getIngredient().getItems()) {
-
-                        ResourceLocation itemRegistryName = item.getItem().getRegistryName();
-                        try {
-                            if(!itemRegistryName.getNamespace().equals("minecraft")) {
-                                ingredientsContainNonVanillaItems = true;
-                                break;
-                            }
-                        } catch (NullPointerException e) {
-                            // NOTE: Not much we can do if getNamespace() throws...
-                        }
-                    }
-
-                    if(ingredientsContainNonVanillaItems) {
-                        // NOTE: Alredy have a non vanilla recipe
-                        if(recipeNotVanillaFound) {
-                            continue;
-                        }
-
-                        recipesNotVanilla.addRecipe(list, r.getOutput(), null);
-                        recipeNotVanillaFound = true;
-                    } else {
-                        recipesVanilla.addRecipe(list, r.getOutput(), null);
-                        recipeVanillaFound = true;
-                        break;  // NOTE: Got a vanilla recipe. We're done.
-                    }
-
-                    // NOTE: Old code, just use first found recipe and done
-                    // recipes.addRecipe(list, r.getOutput(), null);
-                    // break
+                    recipes.addRecipe(list, r.getOutput(), null);
                 }
             }
-
-            if(recipeVanillaFound) {
-                // NOTE: Always prefer Vanilla recipe
-                recipes = recipesVanilla;
-            } else {
-
-                // NOTE: No vanilla recipe available, use what we got
-                if(recipeNotVanillaFound) {
-                    recipes = recipesNotVanilla;
-                }
-            }
-
-
         }else {
             for (IRecipe r : level.getServer().getRecipeManager().getRecipes()) {
-                if (r.getResultItem().getItem() != craftingItem.getItem())
+                if (r.getResultItem().getItem() != stack.getItem())
                     continue;
 
                 if (r instanceof ShapedRecipe) {
@@ -336,7 +285,7 @@ public class WixieCauldronTile extends TileEntity implements ITickableTileEntity
         return foundPod.get();
     }
 
-    public @Nullable BlockPos findNeededPotion(Potion passedPot, int amount){
+    public static @Nullable BlockPos findNeededPotion(Potion passedPot, int amount, World level, BlockPos worldPosition){
         AtomicReference<BlockPos> foundPod = new AtomicReference<>();
         BlockPos.withinManhattanStream(worldPosition.below(2), 4, 3,4).forEach(bPos ->{
             if (foundPod.get() == null && level.getBlockEntity(bPos) instanceof PotionJarTile) {
@@ -349,7 +298,9 @@ public class WixieCauldronTile extends TileEntity implements ITickableTileEntity
         return foundPod.get();
     }
 
-
+    public @Nullable BlockPos findNeededPotion(Potion passedPot, int amount){
+        return findNeededPotion(passedPot, amount, level, worldPosition);
+    }
 
     public void spawnFlyingItem(BlockPos from, ItemStack stack) {
         EntityFlyingItem flyingItem = new EntityFlyingItem(level, from.above(), worldPosition);

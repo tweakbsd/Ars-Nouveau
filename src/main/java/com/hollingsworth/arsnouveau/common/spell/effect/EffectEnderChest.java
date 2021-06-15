@@ -19,14 +19,14 @@ import net.minecraftforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectEnderChest extends AbstractEffect {
+    public static EffectEnderChest INSTANCE = new EffectEnderChest();
+
     private static final ITextComponent CONTAINER_NAME = new TranslationTextComponent("container.enderchest");
 
-    public EffectEnderChest() {
+    private EffectEnderChest() {
         super(GlyphLib.EffectEnderChestID, "Access Ender Inventory");
     }
 
@@ -39,6 +39,11 @@ public class EffectEnderChest extends AbstractEffect {
             }, CONTAINER_NAME));
         }
 
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf();
     }
 
     @Override

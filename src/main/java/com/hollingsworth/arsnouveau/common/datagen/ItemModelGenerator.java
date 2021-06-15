@@ -2,6 +2,7 @@ package com.hollingsworth.arsnouveau.common.datagen;
 
 import com.google.common.base.Preconditions;
 import com.hollingsworth.arsnouveau.common.items.Glyph;
+import com.hollingsworth.arsnouveau.common.items.RitualTablet;
 import com.hollingsworth.arsnouveau.common.lib.LibBlockNames;
 import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.data.DataGenerator;
@@ -25,6 +26,12 @@ public class ItemModelGenerator extends net.minecraftforge.client.model.generato
                 }catch (Exception e){
                     System.out.println("No texture for " + i.toString());
                 }
+            }else if(i instanceof RitualTablet){
+                try {
+                    getBuilder("ritual_" + ((RitualTablet) i).ritual.getID()).parent(new ModelFile.UncheckedModelFile("item/generated")).texture("layer0", ritualTexture(i));
+                }catch (Exception e){
+                    System.out.println("No texture for " + i.toString());
+                }
             }else{
                 try {
                     getBuilder(i.getRegistryName().getPath()).parent(new ModelFile.UncheckedModelFile("item/generated")).texture("layer0", itemTexture(i));
@@ -32,6 +39,8 @@ public class ItemModelGenerator extends net.minecraftforge.client.model.generato
                     System.out.println("No texture for " + i.toString());
                 }
             }
+
+
         });
         getBuilder(LibBlockNames.ARCANE_STONE).parent(BlockStatesDatagen.getUncheckedModel(LibBlockNames.ARCANE_STONE));
         getBuilder(LibBlockNames.AB_ALTERNATE).parent(BlockStatesDatagen.getUncheckedModel(LibBlockNames.AB_ALTERNATE));
@@ -59,6 +68,9 @@ public class ItemModelGenerator extends net.minecraftforge.client.model.generato
         getBuilder(LibBlockNames.AB_SMOOTH_ALTERNATING).parent(BlockStatesDatagen.getUncheckedModel(LibBlockNames.AB_SMOOTH_ALTERNATING));
         getBuilder(LibBlockNames.AB_SMOOTH_ASHLAR).parent(BlockStatesDatagen.getUncheckedModel(LibBlockNames.AB_SMOOTH_ASHLAR));
 
+        getBuilder(ItemsRegistry.EXPERIENCE_GEM.getRegistryName().getPath()).parent(new ModelFile.UncheckedModelFile("item/generated")).texture("layer0", itemTexture(ItemsRegistry.EXPERIENCE_GEM));
+        getBuilder(ItemsRegistry.GREATER_EXPERIENCE_GEM.getRegistryName().getPath()).parent(new ModelFile.UncheckedModelFile("item/generated")).texture("layer0", itemTexture(ItemsRegistry.GREATER_EXPERIENCE_GEM));
+
     }
 
 
@@ -78,5 +90,10 @@ public class ItemModelGenerator extends net.minecraftforge.client.model.generato
     private ResourceLocation spellTexture(final Item item) {
         final ResourceLocation name = registryName(item);
         return new ResourceLocation(name.getNamespace(), "items" + "/" + name.getPath().replace("glyph_", ""));
+    }
+
+    private ResourceLocation ritualTexture(final Item item) {
+        final ResourceLocation name = registryName(item);
+        return new ResourceLocation(name.getNamespace(), "items" + "/" + name.getPath());
     }
 }

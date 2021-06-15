@@ -86,7 +86,8 @@ public class SpellBow extends BowItem implements IAnimatable, ICasterTool {
 
     public EntitySpellArrow buildSpellArrow(World worldIn, PlayerEntity playerentity, ISpellCaster caster, boolean isSpellArrow){
         EntitySpellArrow spellArrow = new EntitySpellArrow(worldIn, playerentity);
-        spellArrow.spellResolver = new SpellResolver(new SpellContext(caster.getSpell(), playerentity)).withSilent(true);
+        spellArrow.spellResolver = new SpellResolver(new SpellContext(caster.getSpell(), playerentity).withColors(caster.getColor())).withSilent(true);
+        spellArrow.setColors(caster.getColor().r, caster.getColor().g, caster.getColor().b);
         if(isSpellArrow)
             spellArrow.setBaseDamage(0);
         return spellArrow;
@@ -237,13 +238,13 @@ public class SpellBow extends BowItem implements IAnimatable, ICasterTool {
 
     @Override
     public void sendInvalidMessage(PlayerEntity player) {
-        PortUtil.sendMessage(player, new TranslationTextComponent("ars_nouveau.bow.invalid"));
+        PortUtil.sendMessageNoSpam(player, new TranslationTextComponent("ars_nouveau.bow.invalid"));
     }
 
     @Override
     public boolean setSpell(ISpellCaster caster, PlayerEntity player, Hand hand, ItemStack stack, Spell spell) {
         ArrayList<AbstractSpellPart> recipe = new ArrayList<>();
-        recipe.add(new MethodProjectile());
+        recipe.add(MethodProjectile.INSTANCE);
         recipe.addAll(spell.recipe);
         spell.recipe = recipe;
         return ICasterTool.super.setSpell(caster, player, hand, stack, spell);

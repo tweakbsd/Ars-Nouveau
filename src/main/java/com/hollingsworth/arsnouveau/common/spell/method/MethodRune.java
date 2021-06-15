@@ -21,9 +21,12 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class MethodRune extends AbstractCastMethod {
-    public MethodRune() {
+    public static MethodRune INSTANCE = new MethodRune();
+
+    private MethodRune() {
         super(GlyphLib.MethodRuneID, "Rune");
     }
 
@@ -100,6 +103,11 @@ public class MethodRune extends AbstractCastMethod {
     @Override
     public int getManaCost() {
         return 30;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf();
     }
 
     @Override

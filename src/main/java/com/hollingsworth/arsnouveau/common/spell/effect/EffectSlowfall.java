@@ -11,22 +11,31 @@ import net.minecraft.potion.Effects;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
-
-import com.hollingsworth.arsnouveau.api.spell.ISpellTier.Tier;
+import java.util.Set;
 
 public class EffectSlowfall extends AbstractEffect {
-    public EffectSlowfall() {
+    public static EffectSlowfall INSTANCE = new EffectSlowfall();
+
+    private EffectSlowfall() {
         super(GlyphLib.EffectSlowfallID, "Slowfall");
     }
 
     @Override
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         if(rayTraceResult instanceof EntityRayTraceResult && ((EntityRayTraceResult) rayTraceResult).getEntity() instanceof LivingEntity){
-            applyPotion(((LivingEntity) ((EntityRayTraceResult) rayTraceResult).getEntity()), Effects.SLOW_FALLING, augments);
+            applyConfigPotion(((LivingEntity) ((EntityRayTraceResult) rayTraceResult).getEntity()), Effects.SLOW_FALLING, augments);
         }
+    }
+
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addPotionConfig(builder, 30);
+        addExtendTimeConfig(builder, 8);
     }
 
     @Override
@@ -48,6 +57,11 @@ public class EffectSlowfall extends AbstractEffect {
     @Override
     public Tier getTier() {
         return Tier.ONE;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return POTION_AUGMENTS;
     }
 
     @Override

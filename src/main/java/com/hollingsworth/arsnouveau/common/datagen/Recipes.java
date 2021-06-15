@@ -1,7 +1,11 @@
 package com.hollingsworth.arsnouveau.common.datagen;
 
 import com.hollingsworth.arsnouveau.ArsNouveau;
+import com.hollingsworth.arsnouveau.api.ArsNouveauAPI;
 import com.hollingsworth.arsnouveau.common.lib.LibBlockNames;
+import com.hollingsworth.arsnouveau.common.lib.RitualLib;
+import com.hollingsworth.arsnouveau.common.spell.effect.EffectGrow;
+import com.hollingsworth.arsnouveau.common.spell.effect.EffectHeal;
 import com.hollingsworth.arsnouveau.setup.BlockRegistry;
 import com.hollingsworth.arsnouveau.setup.ItemsRegistry;
 import net.minecraft.advancements.criterion.InventoryChangeTrigger;
@@ -252,12 +256,126 @@ public class Recipes extends RecipeProvider {
                     .define('y', Items.STICK)
                     .define('z', Items.FEATHER)
                 .save(consumer, new ResourceLocation(ArsNouveau.MODID, "spike_to_arrow"));
+
             shapelessBuilder(BlockRegistry.POTION_JAR)
                     .requires(BlockRegistry.MANA_JAR)
                     .requires(Items.NETHER_WART)
                     .save(consumer);
 
+            shapelessBuilder(BlockRegistry.RITUAL_BLOCK)
+                    .requires(BlockRegistry.ARCANE_PEDESTAL)
+                    .requires(Recipes.MANA_GEM_BLOCK_TAG)
+                    .requires(Ingredient.of(Tags.Items.INGOTS_GOLD), 3)
+                    .save(consumer);
+
+            shapelessBuilder(BlockRegistry.SCONCE_BLOCK)
+                    .requires(Recipes.MANA_GEM)
+                    .requires(Ingredient.of(Tags.Items.INGOTS_GOLD), 2)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.MOONFALL))
+                    .requires(BlockRegistry.CASCADING_LOG)
+                    .requires(Items.INK_SAC)
+                    .requires(Tags.Items.STORAGE_BLOCKS_COAL)
+                    .requires(Items.CLOCK)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.MOONFALL))
+                    .requires(BlockRegistry.CASCADING_LOG)
+                    .requires(ItemsRegistry.WILDEN_WING)
+                    .save(consumer, new ResourceLocation(ArsNouveau.MODID, "moonfall_2"));
+
+            shapelessBuilder(getRitualItem(RitualLib.SUNRISE))
+                    .requires(BlockRegistry.BLAZING_LOG)
+                    .requires(Items.DANDELION, 3)
+                    .requires(Items.CLOCK)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.SUNRISE))
+                    .requires(BlockRegistry.BLAZING_LOG)
+                    .requires(Items.SUNFLOWER)
+                    .save(consumer,  new ResourceLocation(ArsNouveau.MODID, "sunrise_2"));
+
+            shapelessBuilder(getRitualItem(RitualLib.DIG))
+                    .requires(BlockRegistry.FLOURISHING_LOG)
+                    .requires(Items.IRON_PICKAXE)
+                    .requires(Tags.Items.STORAGE_BLOCKS_COAL)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.CLOUDSHAPER))
+                    .requires(BlockRegistry.CASCADING_LOG)
+                    .requires(Items.FEATHER)
+                    .requires(MANA_GEM_BLOCK_TAG)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.CHALLENGE))
+                    .requires(BlockRegistry.VEXING_LOG)
+                    .requires(Items.EMERALD_BLOCK)
+                    .requires(Items.INK_SAC)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.CHALLENGE))
+                    .requires(BlockRegistry.VEXING_LOG)
+                    .requires(ItemsRegistry.WILDEN_HORN)
+                    .requires(Items.EMERALD)
+                    .save(consumer, new ResourceLocation(ArsNouveau.MODID, "challenge_2"));
+
+            shapelessBuilder(getRitualItem(RitualLib.OVERGROWTH))
+                    .requires(BlockRegistry.FLOURISHING_LOG)
+                    .requires(ItemsRegistry.manaBloom, 3)
+                    .requires(ArsNouveauAPI.getInstance().getGlyphItem(EffectGrow.INSTANCE), 2)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.FERTILITY))
+                    .requires(BlockRegistry.FLOURISHING_LOG)
+                    .requires(Items.WHEAT, 3)
+                    .requires(Items.GOLDEN_APPLE)
+                    .requires(Items.BLAZE_POWDER, 2)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.RESTORATION))
+                    .requires(BlockRegistry.FLOURISHING_LOG)
+                    .requires(Items.GOLDEN_APPLE)
+                    .requires(ArsNouveauAPI.getInstance().getGlyphItem(EffectHeal.INSTANCE), 1)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.DISINTEGRATION))
+                    .requires(BlockRegistry.BLAZING_LOG)
+                    .requires(Items.GOLDEN_SWORD, 3)
+                    .requires(Items.BOOK, 3)
+                    .save(consumer);
+
+            shapelessBuilder(getRitualItem(RitualLib.WARP))
+                    .requires(BlockRegistry.VEXING_LOG)
+                    .requires(ItemsRegistry.warpScroll)
+                    .save(consumer);
+
+            shapelessBuilder(ItemsRegistry.GREATER_EXPERIENCE_GEM)
+                    .requires(ItemsRegistry.EXPERIENCE_GEM, 4)
+                    .save(consumer);
+            shapelessBuilder(ItemsRegistry.EXPERIENCE_GEM, 4)
+                    .requires(ItemsRegistry.GREATER_EXPERIENCE_GEM)
+                    .save(consumer);
+
+            shapelessBuilder(ItemsRegistry.ALLOW_ITEM_SCROLL)
+                    .requires(ItemsRegistry.ALLOW_ITEM_SCROLL)
+                    .save(consumer, new ResourceLocation(ArsNouveau.MODID, "clear_allow"));
+
+            shapelessBuilder(ItemsRegistry.DENY_ITEM_SCROLL)
+                    .requires(ItemsRegistry.DENY_ITEM_SCROLL)
+                    .save(consumer, new ResourceLocation(ArsNouveau.MODID, "clear_deny"));
+
+            shapelessBuilder(getRitualItem(RitualLib.SCRYING))
+                    .requires(BlockRegistry.VEXING_LOG)
+                    .requires(Items.SPIDER_EYE, 3)
+                    .requires(Items.GLOWSTONE)
+                    .requires(Recipes.MANA_GEM_BLOCK)
+                    .save(consumer);
         }
+    }
+
+    public Item getRitualItem(String id){
+        return ArsNouveauAPI.getInstance().getRitualItemMap().get(id);
     }
 
     public static ShapedRecipeBuilder makeWood(IItemProvider logs, IItemProvider wood, int count){

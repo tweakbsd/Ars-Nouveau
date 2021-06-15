@@ -6,10 +6,7 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.SpellUtil;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAOE;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtract;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentFortune;
-import com.hollingsworth.arsnouveau.common.spell.augment.AugmentPierce;
+import com.hollingsworth.arsnouveau.common.spell.augment.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.Enchantment;
@@ -28,12 +25,14 @@ import net.minecraft.world.server.ServerWorld;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.hollingsworth.arsnouveau.api.util.BlockUtil.destroyBlockSafely;
 
 public class EffectBreak extends AbstractEffect {
+    public static EffectBreak INSTANCE = new EffectBreak();
 
-    public EffectBreak() {
+    private EffectBreak() {
         super(GlyphLib.EffectBreakID, "Break");
     }
 
@@ -93,6 +92,11 @@ public class EffectBreak extends AbstractEffect {
     }
 
     @Override
+    public boolean defaultedStarterGlyph() {
+        return true;
+    }
+
+    @Override
     public boolean wouldSucceed(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments) {
         return rayTraceResult instanceof BlockRayTraceResult && world.getBlockState(((BlockRayTraceResult) rayTraceResult).getBlockPos()).getMaterial() != Material.AIR && canBlockBeHarvested(augments, world, ((BlockRayTraceResult) rayTraceResult).getBlockPos());
     }
@@ -106,6 +110,17 @@ public class EffectBreak extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.IRON_PICKAXE;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(
+                AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE,
+                AugmentPierce.INSTANCE,
+                AugmentAOE.INSTANCE,
+                AugmentExtract.INSTANCE,
+                AugmentFortune.INSTANCE
+        );
     }
 
     @Override

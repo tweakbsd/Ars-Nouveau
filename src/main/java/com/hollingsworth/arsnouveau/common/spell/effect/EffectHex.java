@@ -11,13 +11,16 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectHex extends AbstractEffect {
+    public static EffectHex INSTANCE = new EffectHex();
 
-    public EffectHex() {
+    private EffectHex() {
         super(GlyphLib.EffectHexID, "Hex");
     }
 
@@ -27,7 +30,19 @@ public class EffectHex extends AbstractEffect {
         Entity entity = rayTraceResult.getEntity();
         if(!(entity instanceof LivingEntity))
             return;
-        applyPotionWithCap((LivingEntity) entity, ModPotions.HEX_EFFECT, augments, 30, 8, 5);
+        applyPotionWithCap((LivingEntity) entity, ModPotions.HEX_EFFECT, augments, POTION_TIME.get(), EXTEND_TIME.get(), 5);
+    }
+
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addPotionConfig(builder, 30);
+        addExtendTimeConfig(builder, 8);
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return POTION_AUGMENTS;
     }
 
     @Override
@@ -38,7 +53,7 @@ public class EffectHex extends AbstractEffect {
     @Nullable
     @Override
     public Item getCraftingReagent() {
-        return ArsNouveauAPI.getInstance().getGlyphItem(new EffectWither());
+        return ArsNouveauAPI.getInstance().getGlyphItem(EffectWither.INSTANCE);
     }
 
     @Override

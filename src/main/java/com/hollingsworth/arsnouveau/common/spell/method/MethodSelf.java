@@ -14,14 +14,16 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
-
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class MethodSelf extends AbstractCastMethod {
-    public MethodSelf() {
+    public static MethodSelf INSTANCE = new MethodSelf();
+
+    private MethodSelf() {
         super(GlyphLib.MethodSelfID, "Self");
     }
 
@@ -82,6 +84,11 @@ public class MethodSelf extends AbstractCastMethod {
     }
 
     @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf();
+    }
+
+    @Override
     public String getBookDescription() {
         return "A spell you start with. Applies spells on the caster.";
     }
@@ -90,5 +97,10 @@ public class MethodSelf extends AbstractCastMethod {
     @Override
     public Item getCraftingReagent() {
         return Items.GLASS_BOTTLE;
+    }
+
+    @Override
+    public boolean defaultedStarterGlyph() {
+        return true;
     }
 }

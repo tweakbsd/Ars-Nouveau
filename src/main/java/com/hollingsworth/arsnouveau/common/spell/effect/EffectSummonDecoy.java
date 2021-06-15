@@ -5,6 +5,8 @@ import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.common.entity.EntityDummy;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDampen;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.item.Item;
@@ -12,12 +14,16 @@ import net.minecraft.item.Items;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectSummonDecoy extends AbstractEffect {
-    public EffectSummonDecoy() {
+    public static EffectSummonDecoy INSTANCE = new EffectSummonDecoy();
+
+    private EffectSummonDecoy() {
         super(GlyphLib.EffectDecoyID, "Summon Decoy");
     }
 
@@ -28,7 +34,7 @@ public class EffectSummonDecoy extends AbstractEffect {
         if(shooter != null){
             Vector3d pos = safelyGetHitPos(rayTraceResult);
             EntityDummy dummy = new EntityDummy(world);
-            dummy.ticksLeft = 30 * 20 + getDurationModifier(augments) * 20 * 15;
+            dummy.ticksLeft = 20 * (GENERIC_INT.get() + getDurationModifier(augments) * EXTEND_TIME.get());
 //            dummy.setUUID(shooter.getUUID());
             dummy.setPos(pos.x, pos.y +1, pos.z);
             dummy.setOwnerID(shooter.getUUID());
@@ -39,6 +45,12 @@ public class EffectSummonDecoy extends AbstractEffect {
         }
     }
 
+    @Override
+    public void buildConfig(ForgeConfigSpec.Builder builder) {
+        super.buildConfig(builder);
+        addExtendTimeConfig(builder, 15);
+        addGenericInt(builder, 30, "Base duration in seconds", "duration");
+    }
 
     @Override
     public int getManaCost() {
@@ -48,6 +60,12 @@ public class EffectSummonDecoy extends AbstractEffect {
     @Override
     public Tier getTier() {
         return Tier.THREE;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        // SummonEvent captures augments, but no uses of that field were found
+        return SUMMON_AUGMENTS;
     }
 
     @Override

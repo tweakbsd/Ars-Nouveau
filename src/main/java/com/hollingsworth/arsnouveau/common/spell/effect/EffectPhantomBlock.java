@@ -21,10 +21,12 @@ import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public class EffectPhantomBlock extends AbstractEffect {
+    public static EffectPhantomBlock INSTANCE = new EffectPhantomBlock();
 
-    public EffectPhantomBlock() {
+    private EffectPhantomBlock() {
         super(GlyphLib.EffectPhantomBlockID, "Phantom");
     }
 
@@ -52,6 +54,11 @@ public class EffectPhantomBlock extends AbstractEffect {
     @Override
     public Item getCraftingReagent() {
         return Items.GLASS;
+    }
+
+    @Override
+    public Set<AbstractAugment> getCompatibleAugments() {
+        return augmentSetOf(AugmentAOE.INSTANCE, AugmentPierce.INSTANCE);
     }
 
     @Override
