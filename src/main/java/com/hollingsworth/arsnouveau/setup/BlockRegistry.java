@@ -209,6 +209,8 @@ public class BlockRegistry {
     @ObjectHolder(LibBlockNames.SCONCE) public static SconceBlock SCONCE_BLOCK;
     @ObjectHolder(LibBlockNames.SCONCE) public static TileEntityType<SconceTile> SCONCE_TILE;
 
+    @ObjectHolder(LibBlockNames.DRYGMY_STONE) public static DrygmyStone DRYGMY_BLOCK;
+    @ObjectHolder(LibBlockNames.DRYGMY_STONE) public static TileEntityType<DrygmyTile> DRYGMY_TILE;
 
 
     @ObjectHolder("an_stateprovider") public static BlockStateProviderType stateProviderType;
@@ -306,6 +308,7 @@ public class BlockRegistry {
             registry.register(new ModBlock(LibBlockNames.AB_SMOOTH_ALTERNATING));
             registry.register(new ModBlock(LibBlockNames.AB_SMOOTH_ASHLAR));
             registry.register(new SconceBlock(LibBlockNames.SCONCE));
+            registry.register(new DrygmyStone());
         }
         static Block.Properties woodProp = AbstractBlock.Properties.of(Material.WOOD, MaterialColor.WOOD).strength(2.0F, 3.0F).sound(SoundType.WOOD);
         public static MagicLeaves createLeavesBlock() {
@@ -340,6 +343,7 @@ public class BlockRegistry {
             event.getRegistry().register(TileEntityType.Builder.of(PotionJarTile::new, BlockRegistry.POTION_JAR).build(null).setRegistryName(LibBlockNames.POTION_JAR_BLOCK));
             event.getRegistry().register(TileEntityType.Builder.of(PotionMelderTile::new, BlockRegistry.POTION_MELDER).build(null).setRegistryName(LibBlockNames.POTION_MELDER_BLOCK));
             event.getRegistry().register(TileEntityType.Builder.of(SconceTile::new, BlockRegistry.SCONCE_BLOCK).build(null).setRegistryName(LibBlockNames.SCONCE));
+            event.getRegistry().register(TileEntityType.Builder.of(SconceTile::new, BlockRegistry.DRYGMY_BLOCK).build(null).setRegistryName(LibBlockNames.DRYGMY_STONE));
 
         }
 

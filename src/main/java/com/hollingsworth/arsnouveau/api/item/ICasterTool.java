@@ -12,11 +12,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.*;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -59,7 +58,7 @@ public interface ICasterTool extends IScribeable, IDisplayMana {
         PortUtil.sendMessageNoSpam(player, new TranslationTextComponent("ars_nouveau.invalid_spell"));
     }
 
-    default ISpellCaster getSpellCaster(ItemStack stack){
+    default @Nonnull ISpellCaster getSpellCaster(ItemStack stack){
         return SpellCaster.deserialize(stack);
     }
 
@@ -67,6 +66,7 @@ public interface ICasterTool extends IScribeable, IDisplayMana {
         caster.setSpell(spell);
         return true;
     }
+
 
     default boolean isScribedSpellValid(ISpellCaster caster, PlayerEntity player, Hand hand, ItemStack stack, Spell spell){
         return spell.isValid();
@@ -82,8 +82,7 @@ public interface ICasterTool extends IScribeable, IDisplayMana {
         if(worldIn == null)
             return;
         ISpellCaster caster = getSpellCaster(stack);
-        if(caster == null)
-            return;
+
         if(caster.getSpell() == null || caster.getSpell().isEmpty()){
             tooltip2.add(new TranslationTextComponent("ars_nouveau.tooltip.can_inscribe"));
             return;
@@ -91,6 +90,7 @@ public interface ICasterTool extends IScribeable, IDisplayMana {
 
         Spell spell = caster.getSpell();
         tooltip2.add(new StringTextComponent(spell.getDisplayString()));
-
+        if(!caster.getFlavorText().isEmpty())
+            tooltip2.add(new StringTextComponent(caster.getFlavorText()).withStyle(Style.EMPTY.withItalic(true).withColor(TextFormatting.BLUE)));
     }
 }

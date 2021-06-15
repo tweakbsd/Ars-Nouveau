@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class EffectPlaceBlock extends AbstractEffect {
                 fakePlayer.setItemInHand(Hand.MAIN_HAND, stack);
 
                 // Special offset for touch
-                boolean isTouch = spellContext.spell.recipe.get(0) instanceof MethodTouch;
+                boolean isTouch = spellContext.getSpell().recipe.get(0) instanceof MethodTouch;
                 BlockState blockTargetted = isTouch ? world.getBlockState(hitPos.relative(result.getDirection().getOpposite())) : world.getBlockState(hitPos.relative(result.getDirection()));
                 if(blockTargetted.getMaterial() != Material.AIR)
                     continue;
@@ -123,6 +124,7 @@ public class EffectPlaceBlock extends AbstractEffect {
         return Items.DISPENSER;
     }
 
+    @Nonnull
     @Override
     public Set<AbstractAugment> getCompatibleAugments() {
         return augmentSetOf(AugmentAOE.INSTANCE, AugmentPierce.INSTANCE);

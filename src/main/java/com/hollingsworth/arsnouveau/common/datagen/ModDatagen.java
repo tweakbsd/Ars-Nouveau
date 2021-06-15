@@ -5,6 +5,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 
+import static com.hollingsworth.arsnouveau.ArsNouveau.MODID;
+
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModDatagen {
 
@@ -22,5 +24,6 @@ public class ModDatagen {
         event.getGenerator().addProvider(new GlyphRecipeProvider(event.getGenerator()));
         event.getGenerator().addProvider(new ApparatusRecipeProvider(event.getGenerator()));
         event.getGenerator().addProvider(new PatchouliProvider(event.getGenerator()));
+        event.getGenerator().addProvider(new DungeonLootGenerator(event.getGenerator(), MODID));
     }
 }

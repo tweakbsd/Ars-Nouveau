@@ -6,6 +6,7 @@ import com.hollingsworth.arsnouveau.api.event.EventQueue;
 import com.hollingsworth.arsnouveau.api.spell.AbstractAugment;
 import com.hollingsworth.arsnouveau.api.spell.AbstractEffect;
 import com.hollingsworth.arsnouveau.api.spell.SpellContext;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDurationDown;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -14,6 +15,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
@@ -29,11 +31,11 @@ public class EffectDelay extends AbstractEffect {
     public void onResolve(RayTraceResult rayTraceResult, World world, LivingEntity shooter, List<AbstractAugment> augments, SpellContext spellContext) {
         spellContext.setCanceled(true);
 
-        if(spellContext.getCurrentIndex() >= spellContext.spell.recipe.size())
+        if(spellContext.getCurrentIndex() >= spellContext.getSpell().recipe.size())
             return;
         EventQueue.getInstance().addEvent(
-                new DelayedSpellEvent(GENERIC_INT.get() + EXTEND_TIME.get() * getBuffCount(augments, AugmentExtendTime.class) * 20,
-                        spellContext.spell.recipe.subList(spellContext.getCurrentIndex(), spellContext.spell.recipe.size()),
+                new DelayedSpellEvent(GENERIC_INT.get() + EXTEND_TIME.get() * getBuffCount(augments, AugmentExtendTime.class) * 20 - (EXTEND_TIME.get() / 2) * getBuffCount(augments, AugmentDurationDown.class) * 20 ,
+                        spellContext.getSpell().recipe.subList(spellContext.getCurrentIndex(), spellContext.getSpell().recipe.size()),
                         rayTraceResult, world, shooter));
 
     }
@@ -50,14 +52,15 @@ public class EffectDelay extends AbstractEffect {
         return 0;
     }
 
+    @Nonnull
     @Override
     public Set<AbstractAugment> getCompatibleAugments() {
-        return augmentSetOf(AugmentExtendTime.INSTANCE);
+        return augmentSetOf(AugmentExtendTime.INSTANCE, AugmentDurationDown.INSTANCE);
     }
 
     @Override
     public String getBookDescription() {
-        return "Delays the resolution of effects placed to the right of this spell for a few moments. The delay may be increased with the Extend Time augment.";
+        return "Delays the resolution of effects placed to the right of this spell for a few moments. The delay may be increased with the Extend Time augment, or decreased with Duration Down.";
     }
 
     @Override
